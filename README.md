@@ -1,3 +1,37 @@
+# Description
+
+Our Recipe Sharing Platform is a Java Spring Boot web service for discovering, storing, and sharing recipes. It features user authentication, recipe management and social engagement like adding to favorites and commenting.
+
+## User Authentication & Profile
+
+- Register a new user: POST /api/auth/register
+- Login a user: POST /api/auth/login
+- Refresh JWT token: POST /api/auth/refresh-token
+- Get user profile: GET /api/users/{id}
+- Update user profile: PUT /api/users/{id}
+- Delete user profile: DELETE /api/users/{id}
+- Change password: PUT /api/users/{id}/change-password
+
+## Recipe Management & Favorites
+
+- Add a new recipe: POST /api/recipes
+- Get all recipes: GET /api/recipes
+- Get a recipe by ID: GET /api/recipes/{id}
+- Update a recipe: PUT /api/recipes/{id}
+- Delete a recipe: DELETE /api/recipes/{id}
+- Add recipe to favorites: POST /api/recipes/{id}/favorite
+- Remove recipe from favorites: POST /api/recipes/{id}/unfavorite
+- Get favorite recipes of a user: GET /api/users/{id}/favorites
+
+## Additional Features
+
+- Leave a comment on a recipe: POST /api/recipes/{id}/comments
+- Get comments for a recipe: GET /api/recipes/{id}/comments
+- Update a comment: PUT /api/recipes/{recipeId}/comments/{commentId}
+- Delete a comment: DELETE /api/recipes/{recipeId}/comments/{commentId}
+- Search recipes: GET /api/recipes/search?query={query}
+- Filter recipes: GET /api/recipes/filter?category={category}
+
 # Prerequisites
 
 For using Github Codespaces, no prerequisites are mandatory.
