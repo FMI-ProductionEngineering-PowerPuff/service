@@ -6,16 +6,16 @@ Our Recipe Sharing Platform is a Java Spring Boot web service for discovering, s
 
 - Register a new user: POST /api/auth/register
 - Login a user: POST /api/auth/login
-- Refresh JWT token: POST /api/auth/refresh-token
 - Get user profile: GET /api/users/{id}
 - Update user profile: PUT /api/users/{id}
 - Delete user profile: DELETE /api/users/{id}
 - Change password: PUT /api/users/{id}/change-password
+- Follow user: POST /api/users/follow/{id}
 
 ## Recipe Management & Favorites
 
 - Add a new recipe: POST /api/recipes
-- Get all recipes: GET /api/recipes
+- Get all recipes filtered by popularity: GET /api/recipes
 - Get a recipe by ID: GET /api/recipes/{id}
 - Update a recipe: PUT /api/recipes/{id}
 - Delete a recipe: DELETE /api/recipes/{id}
@@ -29,8 +29,7 @@ Our Recipe Sharing Platform is a Java Spring Boot web service for discovering, s
 - Get comments for a recipe: GET /api/recipes/{id}/comments
 - Update a comment: PUT /api/recipes/{recipeId}/comments/{commentId}
 - Delete a comment: DELETE /api/recipes/{recipeId}/comments/{commentId}
-- Search recipes: GET /api/recipes/search?query={query}
-- Filter recipes: GET /api/recipes/filter?category={category}
+- Filter recipes by category and sort by popularity: GET /api/recipes/filter?category={category}
 
 # Prerequisites
 

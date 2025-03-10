@@ -51,3 +51,38 @@ DELETE http://localhost:8080/greetings/{{deleteGreetingId}}
 
 
 # TODO add requests for your own endpoints!
+
+### Register a normal user
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "ioanapotlog",
+  "email": "ioanapoltog@gmail.com",
+  "password": "Ioan@2003",
+  "nickname": "Ioana",
+  "bio": "I love cooking and baking!",
+  "role": "USER"
+}
+
+### Register a chef
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "biancadogareci",
+  "email": "biancadogareci@gmail.com",
+  "password": "Bianc@2003",
+  "nickname": "MasterChef",
+  "bio": "Cooking is my passion!",
+  "role": "CHEF"
+}
+
+### Login user
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "biancadogareci@gmail.com",
+  "password": "Bianc@2003"
+}
