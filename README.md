@@ -6,11 +6,13 @@ Our Recipe Sharing Platform is a Java Spring Boot web service for discovering, s
 
 - Register a new user: POST /api/auth/register
 - Login a user: POST /api/auth/login
+- Change password: PUT /api/auth/{id}/change-password
 - Get user profile: GET /api/users/{id}
 - Update user profile: PUT /api/users/{id}
 - Delete user profile: DELETE /api/users/{id}
-- Change password: PUT /api/users/{id}/change-password
 - Follow user: POST /api/users/follow/{id}
+- solicitare contributie
+- create feed based on what chef's you follow
 
 ## Recipe Management & Favorites
 
@@ -22,11 +24,14 @@ Our Recipe Sharing Platform is a Java Spring Boot web service for discovering, s
 - Add recipe to favorites: POST /api/recipes/{id}/favorite
 - Remove recipe from favorites: POST /api/recipes/{id}/unfavorite
 - Get favorite recipes of a user: GET /api/users/{id}/favorites
+- contributia la o reteta, sa valideze daca e bucatar, daca are o atestare, daca are peste 18 ani, daca nu are atestare - daca lucreaza intr-un restuarant
 
 ## Additional Features
 
+- putem comenta doar daca postarea nu e frozen
+- like dislike la comentarii
 - Leave a comment on a recipe: POST /api/recipes/{id}/comments
-- Get comments for a recipe: GET /api/recipes/{id}/comments
+- Get comments for a recipe: GET /api/recipes/{id}/comments ordonate dupa likecount
 - Update a comment: PUT /api/recipes/{recipeId}/comments/{commentId}
 - Delete a comment: DELETE /api/recipes/{recipeId}/comments/{commentId}
 - Filter recipes by category and sort by popularity: GET /api/recipes/filter?category={category}

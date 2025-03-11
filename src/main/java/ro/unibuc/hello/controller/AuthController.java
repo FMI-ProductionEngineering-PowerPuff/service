@@ -1,8 +1,10 @@
-package main.java.ro.unibuc.hello.controller;
+package ro.unibuc.hello.controller;
 
-import main.java.ro.unibuc.hello.data.UserEntity;
-import main.java.ro.unibuc.hello.service.AuthService;
+import ro.unibuc.hello.data.UserEntity;
+import ro.unibuc.hello.service.AuthService;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.stereotype.Controller;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Optional;
 
@@ -38,13 +40,20 @@ public class AuthController {
         return user.isPresent() ? "Login successful!" : "Invalid credentials!";
     }
 
+    @PutMapping("/change-password")
+    @ResponseBody
+    public String changePassword(@RequestBody ChangePasswordRequest request) {
+        boolean success = authService.changePassword(request.getEmail(), request.getOldPassword(), request.getNewPassword());
+        return success ? "Password changed successfully!" : "Invalid old password!";
+    }
+
     static class RegisterRequest {
         private String username;
         private String email;
         private String password;
         private String nickname;
         private String bio;
-        private main.java.ro.unibuc.hello.data.UserRole role;
+        private ro.unibuc.hello.data.UserRole role;
         
         public String getUsername() { return username; }
         public void setUsername(String username) { this.username = username; }
@@ -56,8 +65,8 @@ public class AuthController {
         public void setNickname(String nickname) { this.nickname = nickname; }
         public String getBio() { return bio; }
         public void setBio(String bio) { this.bio = bio; }
-        public main.java.ro.unibuc.hello.data.UserRole getRole() { return role; }
-        public void setRole(main.java.ro.unibuc.hello.data.UserRole role) { this.role = role; }
+        public ro.unibuc.hello.data.UserRole getRole() { return role; }
+        public void setRole(ro.unibuc.hello.data.UserRole role) { this.role = role; }
     }
 
     static class LoginRequest {
@@ -68,5 +77,18 @@ public class AuthController {
         public void setEmail(String email) { this.email = email; }
         public String getPassword() { return password; }
         public void setPassword(String password) { this.password = password; }
+    }
+
+    static class ChangePasswordRequest {
+        private String email;
+        private String oldPassword;
+        private String newPassword;
+
+        public String getEmail() { return email; }
+        public void setEmail(String email) { this.email = email; }
+        public String getOldPassword() { return oldPassword; }
+        public void setOldPassword(String oldPassword) { this.oldPassword = oldPassword; }
+        public String getNewPassword() { return newPassword; }
+        public void setNewPassword(String newPassword) { this.newPassword = newPassword; }
     }
 }

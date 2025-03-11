@@ -1,3 +1,5 @@
+package ro.unibuc.hello.data;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -16,7 +18,6 @@ public class UserEntity {
     private String nickname;
     private String bio;
 
-    @CreatedDate
     private Instant createdAt;
 
     public UserEntity() {

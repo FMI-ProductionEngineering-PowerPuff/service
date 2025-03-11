@@ -84,5 +84,33 @@ Content-Type: application/json
 
 {
   "email": "biancadogareci@gmail.com",
-  "password": "Bianc@2003"
+  "password": "Bianc@2002"
 }
+
+### Change password
+PUT http://localhost:8080/api/auth/change-password
+Content-Type: application/json
+
+{
+  "email": "biancadogareci@gmail.com",
+  "oldPassword": "Bianc@2005",
+  "newPassword": "Bianc@2002"
+}
+
+### Get user
+GET http://localhost:8080/api/users/get-profile/{id}
+
+### Update user
+PUT http://localhost:8080/api/users/update/{id}
+Content-Type: application/json
+
+{
+  "username": "updated_username",
+  "email": "updated_email@example.com",
+  "nickname": "UpdatedNick",
+  "bio": "This is an updated bio"
+}
+
+### Delete user
+DELETE http://localhost:8080/api/users/delete/{id}
+
