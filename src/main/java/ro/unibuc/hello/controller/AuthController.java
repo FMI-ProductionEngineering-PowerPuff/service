@@ -40,7 +40,7 @@ public class AuthController {
     @ResponseBody
     public String login(@RequestBody LoginRequest request) {
         Optional<UserEntity> user = authService.login(request.getEmail(), request.getPassword());
-        return user.isPresent() ? "Login successful!" : "Invalid credentials!";
+        return user.map(value -> value.getId()).orElse("Invalid credentials!");
     }
 
     @PutMapping("/change-password")

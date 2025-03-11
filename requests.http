@@ -84,13 +84,14 @@ Content-Type: application/json
   "role": "CHEF"
 }
 
-### Login user
+### Login user (returns user ID instead of JWT)
+@loggedInUserId = 67d0319f0e62641def75e748
 POST http://localhost:8080/api/auth/login
 Content-Type: application/json
 
 {
   "email": "biancadogareci@gmail.com",
-  "password": "Bianc@2004"
+  "password": "Bianc@2003"
 }
 
 ### Change password
@@ -104,21 +105,21 @@ Content-Type: application/json
 }
 
 ### Get user
-GET http://localhost:8080/api/users/get-profile/{id}
+GET http://localhost:8080/api/users/get-profile/{{loggedInUserId}}
 
 ### Update user
-PUT http://localhost:8080/api/users/update/{id}
+PUT http://localhost:8080/api/users/update/{{loggedInUserId}}
 Content-Type: application/json
 
 {
-  "username": "updated_username",
+  "username": "biancadogareci",
   "email": "biancadogareci@gmail.com",
-  "nickname": "UpdatedNick",
+  "nickname": "Lala",
   "bio": "This is an updated bio",
   "age": 18,
-  "vegetarian": False;
+  "vegetarian": false
 }
 
 ### Delete user
-DELETE http://localhost:8080/api/users/delete/{id}
+DELETE http://localhost:8080/api/users/delete/{{loggedInUserId}}
 

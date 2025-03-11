@@ -18,7 +18,7 @@ public class UserController {
         this.userService = userService;
     }
 
-    @GetMapping("/get-profile")
+    @GetMapping("/get-profile/{id}")
     public ResponseEntity<UserEntity> getUserProfile(@PathVariable String id) {
         Optional<UserEntity> user = userService.getUserById(id);
         return user.map(ResponseEntity::ok)
