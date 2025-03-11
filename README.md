@@ -6,31 +6,37 @@ Our Recipe Sharing Platform is a Java Spring Boot web service for discovering, s
 
 - Register a new user: POST /api/auth/register
 - Login a user: POST /api/auth/login
-- Refresh JWT token: POST /api/auth/refresh-token
-- Get user profile: GET /api/users/{id}
-- Update user profile: PUT /api/users/{id}
-- Delete user profile: DELETE /api/users/{id}
-- Change password: PUT /api/users/{id}/change-password
+- Change password: PUT /api/auth/change-password
+- Get user profile: GET /api/users/get-profile
+- Update user profile: PUT /api/users/edit
+- Delete user profile: DELETE /api/users/delete
+- Follow user: POST /api/users/follow/{id-user}
+- Solicit edit access to recipe (to be a contributor you need to be an authorized chef with at least 5 recipes posted and a following of 100 and 18+): POST /api/users/solicit-access/{id-post}
+- Get recipes from chefs you follow: GET /api/users/get-feed
 
 ## Recipe Management & Favorites
 
-- Add a new recipe: POST /api/recipes
-- Get all recipes: GET /api/recipes
-- Get a recipe by ID: GET /api/recipes/{id}
-- Update a recipe: PUT /api/recipes/{id}
-- Delete a recipe: DELETE /api/recipes/{id}
-- Add recipe to favorites: POST /api/recipes/{id}/favorite
-- Remove recipe from favorites: POST /api/recipes/{id}/unfavorite
-- Get favorite recipes of a user: GET /api/users/{id}/favorites
+- Add a new recipe: POST /api/recipes/add
+- Get all recipes filtered by popularity and age restriction and vegetarian preferences: GET /api/recipes/get-recipes
+- Get a recipe by ID: GET /api/recipes/get-recipe/{id-recipe}
+- Update a recipe: PUT /api/recipes/update/{id-recipe}
+- Delete a recipe: DELETE /api/recipes/delete/{id-recipe}
+- Change frozen status: POST /api/recipes/change-status/{id-recipe}
+- Weekly recipe (from an authorized chef with at least 5 recipes, at least 100 likes): GET api/recipes/get-weekly-recipe
+- Add recipe to favorites: POST /api/favorites/add/{id-recipe}
+- Remove recipe from favorites: POST /api/favorites/remove/{id-recipe}
+- Get favorite recipes of a user: GET /api/favorites/get-favorites
 
 ## Additional Features
 
-- Leave a comment on a recipe: POST /api/recipes/{id}/comments
-- Get comments for a recipe: GET /api/recipes/{id}/comments
-- Update a comment: PUT /api/recipes/{recipeId}/comments/{commentId}
-- Delete a comment: DELETE /api/recipes/{recipeId}/comments/{commentId}
-- Search recipes: GET /api/recipes/search?query={query}
-- Filter recipes: GET /api/recipes/filter?category={category}
+- Leave a comment on a recipe if not frozen: POST /api/comments/{id-recipe}
+- Get comments for a recipe filtered by popularity: GET /api/comments/get-comments/{id-recipe}
+- Update a comment: PUT /api/comments/edit/{id-comment}
+- Delete a comment: DELETE /api/comments/delete/{id-comment}
+- Filter recipes by category and sort by popularity: GET /api/comments/filter?category={category}
+- Like comment: POST /api/comments/like/{id-recipe}
+- Unlike comment: POST /api/comments/unlike/{id-recipe}
+- Report comment: POST /api/comment/report/(id-comment)
 
 # Prerequisites
 

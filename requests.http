@@ -51,3 +51,75 @@ DELETE http://localhost:8080/greetings/{{deleteGreetingId}}
 
 
 # TODO add requests for your own endpoints!
+
+### Register a normal user
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "ioanapotlog",
+  "email": "ioanapoltog@gmail.com",
+  "password": "Ioan@2003",
+  "nickname": "Ioana",
+  "bio": "I love cooking and baking!",
+  "age": 21,
+  "authorization": false,
+  "vegetarian": true,
+  "role": "USER"
+}
+
+### Register a chef
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "biancadogareci",
+  "email": "biancadogareci@gmail.com",
+  "password": "Bianc@2003",
+  "nickname": "MasterChef",
+  "bio": "Cooking is my passion!",
+  "age": 21,
+  "authorization": true,
+  "vegetarian": true,
+  "role": "CHEF"
+}
+
+### Login user (returns user ID instead of JWT)
+@loggedInUserId = 67d0319f0e62641def75e748
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "biancadogareci@gmail.com",
+  "password": "Bianc@2003"
+}
+
+### Change password
+PUT http://localhost:8080/api/auth/change-password
+Content-Type: application/json
+
+{
+  "email": "biancadogareci@gmail.com",
+  "oldPassword": "Bianc@2003",
+  "newPassword": "Bianc@2004"
+}
+
+### Get user
+GET http://localhost:8080/api/users/get-profile/{{loggedInUserId}}
+
+### Update user
+PUT http://localhost:8080/api/users/update/{{loggedInUserId}}
+Content-Type: application/json
+
+{
+  "username": "biancadogareci",
+  "email": "biancadogareci@gmail.com",
+  "nickname": "Lala",
+  "bio": "This is an updated bio",
+  "age": 18,
+  "vegetarian": false
+}
+
+### Delete user
+DELETE http://localhost:8080/api/users/delete/{{loggedInUserId}}
+
