@@ -18,7 +18,7 @@ public class UserService {
         return userRepository.findById(id);
     }
 
-    public Optional<UserEntity> updateUser(String id, String username, String email, String nickname, String bio) {
+    public Optional<UserEntity> updateUser(String id, String username, String email, String nickname, String bio, Integer age, Boolean vegetarian) {
         Optional<UserEntity> userOpt = userRepository.findById(id);
         if (userOpt.isPresent()) {
             UserEntity user = userOpt.get();
@@ -26,6 +26,8 @@ public class UserService {
             user.setEmail(email);
             user.setNickname(nickname);
             user.setBio(bio);
+            user.setAge(age);
+            user.setVegetarian(vegetarian);
             userRepository.save(user);
             return Optional.of(user);
         }

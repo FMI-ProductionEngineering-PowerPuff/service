@@ -17,6 +17,9 @@ public class UserEntity {
     private UserRole role;
     private String nickname;
     private String bio;
+    private Integer age;
+    private Boolean authorization;
+    private Boolean vegetarian;
 
     private Instant createdAt;
 
@@ -24,7 +27,7 @@ public class UserEntity {
         this.createdAt = Instant.now();
     }
 
-    public UserEntity(String username, String email, String password, UserRole role, String nickname, String bio) {
+    public UserEntity(String username, String email, String password, UserRole role, String nickname, String bio, Integer age, Boolean authorization, Boolean vegetarian) {
         this.username = username;
         this.email = email;
         this.password = password;
@@ -32,6 +35,9 @@ public class UserEntity {
         this.nickname = nickname;
         this.bio = bio;
         this.createdAt = Instant.now();
+        this.age = age;
+        this.authorization = authorization;
+        this.vegetarian = vegetarian;
     }
 
     public String getId() {
@@ -96,5 +102,29 @@ public class UserEntity {
 
     public void setCreatedAt(Instant createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public Integer getAge() {
+        return age;
+    }
+
+    public void setAge(Integer age) {
+        this.age = age;
+    }
+
+    public Boolean getAuthorization() {
+        return authorization;
+    }
+
+    public void setAuthorization(Boolean authorization) {
+        this.authorization = authorization;
+    }
+
+    public Boolean getVegetarian() {
+        return vegetarian;
+    }
+
+    public void setVegetarian(Boolean vegetarian) {
+        this.vegetarian = vegetarian;
     }
 }

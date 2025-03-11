@@ -28,7 +28,10 @@ public class AuthController {
                 request.getPassword(),
                 request.getRole(),
                 request.getNickname(),
-                request.getBio()
+                request.getBio(),
+                request.getAge(),
+                request.getAuthorization(),
+                request.getVegetarian()
         );
         return authService.register(user);
     }
@@ -53,6 +56,9 @@ public class AuthController {
         private String password;
         private String nickname;
         private String bio;
+        private Integer age;
+        private Boolean authorization;
+        private Boolean vegetarian;
         private ro.unibuc.hello.data.UserRole role;
         
         public String getUsername() { return username; }
@@ -65,6 +71,12 @@ public class AuthController {
         public void setNickname(String nickname) { this.nickname = nickname; }
         public String getBio() { return bio; }
         public void setBio(String bio) { this.bio = bio; }
+        public Integer getAge() { return age; }
+        public void setAge(Integer age) { this.age = age; }
+        public Boolean getAuthorization() { return authorization; }
+        public void setAuthorization(Boolean authorization) { this.authorization = authorization; }
+        public Boolean getVegetarian() { return vegetarian; }
+        public void setVegetarian(Boolean vegetarian) { this.vegetarian = vegetarian; }
         public ro.unibuc.hello.data.UserRole getRole() { return role; }
         public void setRole(ro.unibuc.hello.data.UserRole role) { this.role = role; }
     }

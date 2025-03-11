@@ -62,6 +62,9 @@ Content-Type: application/json
   "password": "Ioan@2003",
   "nickname": "Ioana",
   "bio": "I love cooking and baking!",
+  "age": 21,
+  "authorization": false,
+  "vegetarian": true,
   "role": "USER"
 }
 
@@ -75,6 +78,9 @@ Content-Type: application/json
   "password": "Bianc@2003",
   "nickname": "MasterChef",
   "bio": "Cooking is my passion!",
+  "age": 21,
+  "authorization": true,
+  "vegetarian": true,
   "role": "CHEF"
 }
 
@@ -84,7 +90,7 @@ Content-Type: application/json
 
 {
   "email": "biancadogareci@gmail.com",
-  "password": "Bianc@2002"
+  "password": "Bianc@2004"
 }
 
 ### Change password
@@ -93,8 +99,8 @@ Content-Type: application/json
 
 {
   "email": "biancadogareci@gmail.com",
-  "oldPassword": "Bianc@2005",
-  "newPassword": "Bianc@2002"
+  "oldPassword": "Bianc@2003",
+  "newPassword": "Bianc@2004"
 }
 
 ### Get user
@@ -106,9 +112,11 @@ Content-Type: application/json
 
 {
   "username": "updated_username",
-  "email": "updated_email@example.com",
+  "email": "biancadogareci@gmail.com",
   "nickname": "UpdatedNick",
-  "bio": "This is an updated bio"
+  "bio": "This is an updated bio",
+  "age": 18,
+  "vegetarian": False;
 }
 
 ### Delete user
