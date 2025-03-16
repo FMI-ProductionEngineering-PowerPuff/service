@@ -85,13 +85,13 @@ Content-Type: application/json
 }
 
 ### Login user (returns user ID instead of JWT)
-@loggedInUserId = 67d0319f0e62641def75e748
+@loggedInUserId = 67d73394e9a5b42f61e2d081
 POST http://localhost:8080/api/auth/login
 Content-Type: application/json
 
 {
-  "email": "biancadogareci@gmail.com",
-  "password": "Bianc@2003"
+  "email": "ioanapoltog@gmail.com",
+  "password": "Ioan@2003"
 }
 
 ### Change password
@@ -123,3 +123,8 @@ Content-Type: application/json
 ### Delete user
 DELETE http://localhost:8080/api/users/delete/{{loggedInUserId}}
 
+### Follow user
+@userIdToFollow = 67d7339be9a5b42f61e2d082
+
+POST http://localhost:8080/api/users/follow/{{userIdToFollow}}?followerId={{loggedInUserId}}
+Content-Type: application/json

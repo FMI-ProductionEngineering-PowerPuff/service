@@ -40,6 +40,16 @@ public class UserController {
         return ResponseEntity.notFound().build();
     }
 
+    @PostMapping("/follow/{id-user}")
+    public ResponseEntity<String> followUser(@PathVariable("id-user") String userId, @RequestParam String followerId) {
+        String result = userService.followUser(followerId, userId);
+        if (result.equals("Successfully followed the chef!")) {
+            return ResponseEntity.ok(result);
+        } else {
+            return ResponseEntity.badRequest().body(result);
+        }
+    }
+    
     static class UpdateUserRequest {
         private String username;
         private String email;
