@@ -26,7 +26,6 @@ Our Recipe Sharing Platform is a Java Spring Boot web service for discovering, s
 - Featured recipe for each chef account (must be authorized, with at least 3 recipes and at least 4 likes in total)
 - Add recipe to favorites (only users)
 - Remove recipe from favorites
-- Get favorite recipes of a user
 
 ## Comments & Additional Features
 
