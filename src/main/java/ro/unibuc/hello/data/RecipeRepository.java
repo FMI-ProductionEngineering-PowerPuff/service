@@ -14,6 +14,11 @@ public interface RecipeRepository extends MongoRepository<RecipeEntity, String> 
 
     List<RecipeEntity> findAllByOrderByFavoriteCountDesc();
 
+    @Query("{ 'category': ?0 }")
+    List<RecipeEntity> findByCategory(String category);
+
+    List<RecipeEntity> findByCategoryOrderByFavoriteCountDesc(String category);
+
     @Query("{ 'type': ?0 }")
     List<RecipeEntity> findByType(String type);
 
@@ -21,6 +26,7 @@ public interface RecipeRepository extends MongoRepository<RecipeEntity, String> 
     List<RecipeEntity> findVegetarianRecipes();
 
     List<RecipeEntity> findByUserIdInOrderByFavoriteCountDesc(Set<String> userIds); 
+    
     long countByUserId(String userId);
 
     @Aggregation(pipeline = {

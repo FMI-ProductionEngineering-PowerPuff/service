@@ -64,6 +64,16 @@ public class RecipeController {
         return ResponseEntity.ok(recipes);
     }
 
+    @GetMapping("/category")
+    public ResponseEntity<?> getRecipesByCategory(@RequestParam String category) {
+        try {
+            List<RecipeEntity> recipes = recipeService.getRecipesByCategorySortedByPopularity(category);
+            return ResponseEntity.ok(recipes);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
     @PutMapping("/update/{recipeId}")
     public ResponseEntity<?> updateRecipe(@PathVariable String recipeId, 
                                         @RequestParam("userId") String userId, 

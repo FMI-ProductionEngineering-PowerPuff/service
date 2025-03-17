@@ -85,12 +85,12 @@ Content-Type: application/json
 }
 
 ### Login user (returns user ID instead of JWT)
-@loggedInUserId = 67d82485139dba771e61a1cc
+@loggedInUserId = 67d831278756170e67558ec8
 POST http://localhost:8080/api/auth/login
 Content-Type: application/json
 
 {
-  "email": "ioanapoltog@gmail.com",
+  "email": "ioanapoltogg@gmail.com",
   "password": "Ioan@2003"
 }
 
@@ -176,7 +176,7 @@ Content-Type: application/json
 }
 
 ### Change frozen status (Toggle)
-@recipeId = 67d823ba139dba771e61a1cb
+@recipeId = 67d831388756170e67558eca
 POST http://localhost:8080/api/recipes/change-status/{{recipeId}}?userId={{loggedInUserId}}
 
 ### Get Recipes (Filtered)
@@ -184,6 +184,9 @@ GET http://localhost:8080/api/recipes/get-recipes/{{loggedInUserId}}
 
 ### Get Recipe by ID (with user ID)
 GET http://localhost:8080/api/recipes/get-recipe/{{recipeId}}?userId={{loggedInUserId}}
+
+### Get recipes by category sorted by popularity
+GET http://localhost:8080/api/recipes/category?category=Cocktail
 
 ### Update Recipe
 PUT http://localhost:8080/api/recipes/update/{{recipeId}}?userId={{loggedInUserId}}
@@ -213,3 +216,32 @@ POST http://localhost:8080/api/recipes/add-to-favorites/{{recipeId}}?userId={{lo
 
 ### Remove from favorites 
 DELETE http://localhost:8080/api/recipes/remove-from-favorites/{{recipeId}}?userId={{loggedInUserId}}
+
+### Add a Comment
+POST http://localhost:8080/api/comments/add?userId={{loggedInUserId}}&recipeId={{recipeId}}
+Content-Type: application/json
+
+"This recipe is amazing!!"
+
+### Get Comments for a Recipe
+GET http://localhost:8080/api/comments/get/{{recipeId}}
+
+### Update a Comment
+@commentId = 67d82d01defdfc51469a167b
+PUT http://localhost:8080/api/comments/update/{{commentId}}?userId={{loggedInUserId}}
+Content-Type: application/json
+
+"I changed my mind, this recipe is legendary!"
+
+### Delete a Comment
+DELETE http://localhost:8080/api/comments/delete/{{commentId}}?userId={{loggedInUserId}}
+
+### Like a Comment
+POST http://localhost:8080/api/comments/like/{{commentId}}?userId={{loggedInUserId}}
+
+### Unlike a Comment
+POST http://localhost:8080/api/comments/unlike/{{commentId}}?userId={{loggedInUserId}}
+
+### Report a Comment
+POST http://localhost:8080/api/comments/report/{{commentId}}?userId={{loggedInUserId}}
+

@@ -138,7 +138,15 @@ public class RecipeService {
         System.out.println("Retrieved Recipes: " + recipes);
     
         return recipes;
-    }    
+    } 
+    
+    public List<RecipeEntity> getRecipesByCategorySortedByPopularity(String category) {
+        List<RecipeEntity> recipes = recipeRepository.findByCategoryOrderByFavoriteCountDesc(category);
+        if (recipes.isEmpty()) {
+            throw new IllegalArgumentException("No recipes found for this category.");
+        }
+        return recipes;
+    }
 
     public Optional<RecipeEntity> updateRecipe(String recipeId, String userId, RecipeEntity updatedRecipe) {
         Optional<RecipeEntity> recipeOpt = recipeRepository.findById(recipeId);
