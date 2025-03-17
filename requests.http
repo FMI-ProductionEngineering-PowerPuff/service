@@ -58,7 +58,7 @@ Content-Type: application/json
 
 {
   "username": "ioanapotlog",
-  "email": "ioanapoltog@gmail.com",
+  "email": "ioanapoltogg@gmail.com",
   "password": "Ioan@2003",
   "nickname": "Ioana",
   "bio": "I love cooking and baking!",
@@ -85,7 +85,7 @@ Content-Type: application/json
 }
 
 ### Login user (returns user ID instead of JWT)
-@loggedInUserId = 67d4c5b571f667713aba13eb
+@loggedInUserId = 67d810a66a247808313ba333
 POST http://localhost:8080/api/auth/login
 Content-Type: application/json
 
@@ -117,7 +117,7 @@ Content-Type: application/json
   "nickname": "Lala",
   "bio": "This is an updated bio",
   "age": 18,
-  "vegetarian": false
+  "vegetarian": true
 }
 
 ### Delete user
@@ -143,8 +143,40 @@ Content-Type: application/json
   "favoriteCount": 0
 }
 
+### Add a new recipe
+POST http://localhost:8080/api/recipes/add
+Content-Type: application/json
+
+{
+  "userId": "{{loggedInUserId}}",
+  "name": "Martini",
+  "description": "A delicious drink.",
+  "photo": "https://chocolate-cake.jpg",
+  "category": "Cocktail",
+  "type": "Alcoholic-Drink",
+  "vegetarian": true,
+  "frozen": false,
+  "favoriteCount": 0
+}
+
+### Add a new recipe
+POST http://localhost:8080/api/recipes/add
+Content-Type: application/json
+
+{
+  "userId": "{{loggedInUserId}}",
+  "name": "Meat",
+  "description": "A delicious meal.",
+  "photo": "https://chocolate-cake.jpg",
+  "category": "Meal",
+  "type": "Food",
+  "vegetarian": false,
+  "frozen": false,
+  "favoriteCount": 0
+}
+
 ### Change frozen status (Toggle)
-@recipeId = 67d4c5bd71f667713aba13ec
+@recipeId = 67d810b16a247808313ba334
 POST http://localhost:8080/api/recipes/change-status/{{recipeId}}?userId={{loggedInUserId}}
 
 ### Get Recipes (Filtered)
@@ -170,3 +202,5 @@ Content-Type: application/json
 ### Delete Recipe
 DELETE http://localhost:8080/api/recipes/delete/{{recipeId}}?userId={{loggedInUserId}}
 
+### Get weekly
+GET http://localhost:8080/api/recipes/featured/{{loggedInUserId}}
