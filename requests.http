@@ -85,7 +85,7 @@ Content-Type: application/json
 }
 
 ### Login user (returns user ID instead of JWT)
-@loggedInUserId = 67d73394e9a5b42f61e2d081
+@loggedInUserId = 67d0319f0e62641def75e748
 POST http://localhost:8080/api/auth/login
 Content-Type: application/json
 
@@ -122,6 +122,100 @@ Content-Type: application/json
 
 ### Delete user
 DELETE http://localhost:8080/api/users/delete/{{loggedInUserId}}
+
+
+
+### RECIPE
+
+### Add a new recipe
+POST http://localhost:8080/api/recipes/add
+Content-Type: application/json
+
+{
+  "userId": "{{loggedInUserId}}",
+  "name": "Vanilla Cake",
+  "description": "A delicious chocolate cake.",
+  "photo": "https://chocolate-cake.jpg",
+  "category": "Dessert",
+  "type": "Food",
+  "vegetarian": true,
+  "frozen": false,
+  "favoriteCount": 0
+}
+
+### Change frozen status (Toggle)
+@recipeId = 67d4c5bd71f667713aba13ec
+POST http://localhost:8080/api/recipes/change-status/{{recipeId}}?userId={{loggedInUserId}}
+
+### Get Recipes (Filtered)
+GET http://localhost:8080/api/recipes/get-recipes/{{loggedInUserId}}
+
+### Get Recipe by ID (with user ID)
+GET http://localhost:8080/api/recipes/get-recipe/{{recipeId}}?userId={{loggedInUserId}}
+
+### Update Recipe
+PUT http://localhost:8080/api/recipes/update/{{recipeId}}?userId={{loggedInUserId}}
+Content-Type: application/json
+
+{
+  "name": "Vanillaaa Cake",
+  "description": "Aaaa delicious chocolate cake.",
+  "photo": "https://chocolate-cake.jpg",
+  "category": "Desserttttt",
+  "type": "Food",
+  "vegetarian": true,
+  "frozen": false
+}
+
+### Delete Recipe
+DELETE http://localhost:8080/api/recipes/delete/{{recipeId}}?userId={{loggedInUserId}}
+
+
+
+### RECIPE
+
+### Add a new recipe
+POST http://localhost:8080/api/recipes/add
+Content-Type: application/json
+
+{
+  "userId": "{{loggedInUserId}}",
+  "name": "Vanilla Cake",
+  "description": "A delicious chocolate cake.",
+  "photo": "https://chocolate-cake.jpg",
+  "category": "Dessert",
+  "type": "Food",
+  "vegetarian": true,
+  "frozen": false,
+  "favoriteCount": 0
+}
+
+### Change frozen status (Toggle)
+@recipeId = 67d4c5bd71f667713aba13ec
+POST http://localhost:8080/api/recipes/change-status/{{recipeId}}?userId={{loggedInUserId}}
+
+### Get Recipes (Filtered)
+GET http://localhost:8080/api/recipes/get-recipes/{{loggedInUserId}}
+
+### Get Recipe by ID (with user ID)
+GET http://localhost:8080/api/recipes/get-recipe/{{recipeId}}?userId={{loggedInUserId}}
+
+### Update Recipe
+PUT http://localhost:8080/api/recipes/update/{{recipeId}}?userId={{loggedInUserId}}
+Content-Type: application/json
+
+{
+  "name": "Vanillaaa Cake",
+  "description": "Aaaa delicious chocolate cake.",
+  "photo": "https://chocolate-cake.jpg",
+  "category": "Desserttttt",
+  "type": "Food",
+  "vegetarian": true,
+  "frozen": false
+}
+
+### Delete Recipe
+DELETE http://localhost:8080/api/recipes/delete/{{recipeId}}?userId={{loggedInUserId}}
 
 ### Follow user
 @userIdToFollow = 67d7339be9a5b42f61e2d082
