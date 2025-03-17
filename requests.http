@@ -85,7 +85,7 @@ Content-Type: application/json
 }
 
 ### Login user (returns user ID instead of JWT)
-@loggedInUserId = 67d810a66a247808313ba333
+@loggedInUserId = 67d82485139dba771e61a1cc
 POST http://localhost:8080/api/auth/login
 Content-Type: application/json
 
@@ -176,7 +176,7 @@ Content-Type: application/json
 }
 
 ### Change frozen status (Toggle)
-@recipeId = 67d810b16a247808313ba334
+@recipeId = 67d823ba139dba771e61a1cb
 POST http://localhost:8080/api/recipes/change-status/{{recipeId}}?userId={{loggedInUserId}}
 
 ### Get Recipes (Filtered)
@@ -207,3 +207,9 @@ GET http://localhost:8080/api/recipes/featured/{{loggedInUserId}}
 
 ### Follow user
 @userIdToFollow = 67d7339be9a5b42f61e2d082
+
+### Add to favorites
+POST http://localhost:8080/api/recipes/add-to-favorites/{{recipeId}}?userId={{loggedInUserId}}
+
+### Remove from favorites 
+DELETE http://localhost:8080/api/recipes/remove-from-favorites/{{recipeId}}?userId={{loggedInUserId}}
