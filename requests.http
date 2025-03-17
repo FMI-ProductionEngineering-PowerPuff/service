@@ -3,66 +3,55 @@
 # Prerequisite: humao.rest-client Vscode plugin (already present on codespace)
 # High-level overview of REST API concepts used here: https://www.packtpub.com/en-us/learning/how-to-tutorials/what-are-rest-verbs-and-status-codes-tutorial?srsltid=AfmBOoppDqtkhRxj5BLZONRZFzRDmh6eP-xyTo6H4OuEHYuVbrg1d4Dm
 
+@loggedInUserId = 67d83bea944b994e397a3956
+@recipeId = 67d83c9f944b994e397a3959
+@userIdToFollow = 67d7339be9a5b42f61e2d082
+@commentId = 67d83fa5944b994e397a3965
+@chefId =  67d83e7d944b994e397a395c
 
-# Requests for API endpoints of the sample project:
-
-### Hello world endpoint: get response "Hello, Stranger!"
-GET http://localhost:8080/hello-world
-
-### Hello world with a request param passed.
-# When sending the request it will ask you for the name
-# hitting enter will avoid passing the param, and do the default behaviour above
-# @prompt name The name to display in response
-GET http://localhost:8080/hello-world
-    ?name={{name}}
-
-### Save a greeting to database
-@postGreetingId = 1001
-@postGreetingContent = Hello!
-POST http://localhost:8080/greetings
-Content-Type: application/json
-
-{
-    "id": "{{postGreetingId}}",
-    "content": "{{postGreetingContent}}"
-}
-
-### Get all greetings
-GET http://localhost:8080/greetings
-
-### Get info for greeting with given content
-# @prompt content Greeting content to look for, defaults to "Overview"
-GET http://localhost:8080/info
-    ?title={{content}}
-
-### Update an existing greeting
-@putGreetingId = 1001
-@putGreetingContent = Hello again!
-PUT http://localhost:8080/greetings/{{putGreetingId}}
-Content-Type: application/json
-
-{
-    "content": "{{putGreetingContent}}"
-}
-
-### Delete greeting
-@deleteGreetingId = 1001
-DELETE http://localhost:8080/greetings/{{deleteGreetingId}}
-
-
-# TODO add requests for your own endpoints!
-
-### Register a normal user
+### Register a normal user (18+, vegetarian)
 POST http://localhost:8080/api/auth/register
 Content-Type: application/json
 
 {
   "username": "ioanapotlog",
-  "email": "ioanapoltogg@gmail.com",
+  "email": "ioanapoltog@gmail.com",
   "password": "Ioan@2003",
   "nickname": "Ioana",
   "bio": "I love cooking and baking!",
   "age": 21,
+  "authorization": false,
+  "vegetarian": true,
+  "role": "USER"
+}
+
+### Register a normal user (18+, non-vegetarian)
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "andreeacapitanu",
+  "email": "andreeacapitanu@gmail.com",
+  "password": "Andree@2003",
+  "nickname": "Andreea",
+  "bio": "I love cooking!",
+  "age": 30,
+  "authorization": false,
+  "vegetarian": false,
+  "role": "USER"
+}
+
+### Register a normal user (underage, vegetarian)
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "mariapop",
+  "email": "mariapop@gmail.com",
+  "password": "Mari@2003",
+  "nickname": "Maria",
+  "bio": "I am new here!",
+  "age": 17,
   "authorization": false,
   "vegetarian": true,
   "role": "USER"
@@ -84,14 +73,29 @@ Content-Type: application/json
   "role": "CHEF"
 }
 
+### Register a chef
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "anamaria",
+  "email": "anamaria@gmail.com",
+  "password": "An@20032003",
+  "nickname": "ChefdeChef",
+  "bio": "Cooking is my passion!",
+  "age": 21,
+  "authorization": true,
+  "vegetarian": true,
+  "role": "CHEF"
+}
+
 ### Login user (returns user ID instead of JWT)
-@loggedInUserId = 67d831278756170e67558ec8
 POST http://localhost:8080/api/auth/login
 Content-Type: application/json
 
 {
-  "email": "ioanapoltogg@gmail.com",
-  "password": "Ioan@2003"
+  "email": "biancadogareci@gmail.com",
+  "password": "Bianc@2003"
 }
 
 ### Change password
@@ -123,6 +127,9 @@ Content-Type: application/json
 ### Delete user
 DELETE http://localhost:8080/api/users/delete/{{loggedInUserId}}
 
+### Follow user
+POST http://localhost:8080/api/users/follow/{{userIdToFollow}}?followerId={{loggedInUserId}}
+
 
 
 ### RECIPE
@@ -138,9 +145,7 @@ Content-Type: application/json
   "photo": "https://chocolate-cake.jpg",
   "category": "Dessert",
   "type": "Food",
-  "vegetarian": true,
-  "frozen": false,
-  "favoriteCount": 0
+  "vegetarian": true
 }
 
 ### Add a new recipe
@@ -154,9 +159,7 @@ Content-Type: application/json
   "photo": "https://chocolate-cake.jpg",
   "category": "Cocktail",
   "type": "Alcoholic-Drink",
-  "vegetarian": true,
-  "frozen": false,
-  "favoriteCount": 0
+  "vegetarian": true
 }
 
 ### Add a new recipe
@@ -170,13 +173,10 @@ Content-Type: application/json
   "photo": "https://chocolate-cake.jpg",
   "category": "Meal",
   "type": "Food",
-  "vegetarian": false,
-  "frozen": false,
-  "favoriteCount": 0
+  "vegetarian": false
 }
 
 ### Change frozen status (Toggle)
-@recipeId = 67d831388756170e67558eca
 POST http://localhost:8080/api/recipes/change-status/{{recipeId}}?userId={{loggedInUserId}}
 
 ### Get Recipes (Filtered)
@@ -187,6 +187,9 @@ GET http://localhost:8080/api/recipes/get-recipe/{{recipeId}}?userId={{loggedInU
 
 ### Get recipes by category sorted by popularity
 GET http://localhost:8080/api/recipes/category?category=Cocktail
+
+### Get recipes from followed chefs
+GET http://localhost:8080/api/recipes/get-recipes-by-followed-chefs?userId={{loggedInUserId}}
 
 ### Update Recipe
 PUT http://localhost:8080/api/recipes/update/{{recipeId}}?userId={{loggedInUserId}}
@@ -205,11 +208,16 @@ Content-Type: application/json
 ### Delete Recipe
 DELETE http://localhost:8080/api/recipes/delete/{{recipeId}}?userId={{loggedInUserId}}
 
-### Get weekly
+### Get featured
 GET http://localhost:8080/api/recipes/featured/{{loggedInUserId}}
 
-### Follow user
-@userIdToFollow = 67d7339be9a5b42f61e2d082
+### Add a contributor (valid chef -> authorized chef with at least 3 recipes posted and a following of 2 and 18+)
+POST http://localhost:8080/api/recipes/add-contributor?loggedInUserId={{loggedInUserId}}&chefId={{chefId}}&recipeId={{recipeId}}
+Content-Type: application/json
+
+### Remove a contributor (only if logged-in user is the recipe owner)
+DELETE http://localhost:8080/api/recipes/remove-contributor?loggedInUserId={{loggedInUserId}}&chefId={{chefId}}&recipeId={{recipeId}}
+Content-Type: application/json
 
 ### Add to favorites
 POST http://localhost:8080/api/recipes/add-to-favorites/{{recipeId}}?userId={{loggedInUserId}}
@@ -223,11 +231,16 @@ Content-Type: application/json
 
 "This recipe is amazing!!"
 
+### Add a second Comment
+POST http://localhost:8080/api/comments/add?userId={{loggedInUserId}}&recipeId={{recipeId}}
+Content-Type: application/json
+
+"This recipe is ok!!"
+
 ### Get Comments for a Recipe
 GET http://localhost:8080/api/comments/get/{{recipeId}}
 
 ### Update a Comment
-@commentId = 67d82d01defdfc51469a167b
 PUT http://localhost:8080/api/comments/update/{{commentId}}?userId={{loggedInUserId}}
 Content-Type: application/json
 
