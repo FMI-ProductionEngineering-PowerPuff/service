@@ -211,6 +211,12 @@ GET http://localhost:8080/api/recipes/featured/{{loggedInUserId}}
 ### Follow user
 @userIdToFollow = 67d7339be9a5b42f61e2d082
 
+### Add to favorites
+POST http://localhost:8080/api/recipes/add-to-favorites/{{recipeId}}?userId={{loggedInUserId}}
+
+### Remove from favorites 
+DELETE http://localhost:8080/api/recipes/remove-from-favorites/{{recipeId}}?userId={{loggedInUserId}}
+
 ### Add a Comment
 POST http://localhost:8080/api/comments/add?userId={{loggedInUserId}}&recipeId={{recipeId}}
 Content-Type: application/json

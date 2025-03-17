@@ -49,6 +49,9 @@ public class RecipeService {
         // Orice reteta abia postata nu e frozen
         recipe.setFrozen(false);
 
+        // Orice reteta abia postata are favoriteCount 0
+        recipe.setFavoriteCount(0);
+
         // type poate sa fie Food, Alcoholic-Drink sau Non-Alcoholic-Drink
         if (!recipe.getType().equalsIgnoreCase("Alcoholic-Drink") && !recipe.getType().equalsIgnoreCase("Non-Alcoholic-Drink") && !recipe.getType().equalsIgnoreCase("Food")) {
             throw new IllegalArgumentException("Invalid type. Type must be 'Food', 'Alcoholic-Drink' or Non-Alcoholic-Drink'.");

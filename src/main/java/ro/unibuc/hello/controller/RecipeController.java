@@ -3,6 +3,7 @@ package ro.unibuc.hello.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ro.unibuc.hello.data.RecipeEntity;
+import ro.unibuc.hello.service.FavoriteService;
 import ro.unibuc.hello.service.RecipeService;
 import org.springframework.http.HttpStatus;
 
@@ -14,9 +15,11 @@ import java.util.Optional;
 public class RecipeController {
 
     private final RecipeService recipeService;
+    private final FavoriteService favoriteService;
 
-    public RecipeController(RecipeService recipeService) {
+    public RecipeController(RecipeService recipeService, FavoriteService favoriteService) {
         this.recipeService = recipeService;
+        this.favoriteService = favoriteService;
     }
 
     @PostMapping("/add")
@@ -130,4 +133,24 @@ public class RecipeController {
         }
     }
 
+    @PostMapping("/add-to-favorites/{recipeId}")
+    public ResponseEntity<String> addFavorite(@PathVariable String recipeId, @RequestParam String userId) {
+        try {
+            favoriteService.addFavorite(userId, recipeId);
+            return ResponseEntity.ok("Recipe added to favorites successfully!");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    
+    @DeleteMapping("/remove-from-favorites/{recipeId}")
+    public ResponseEntity<String> removeFavorite(@PathVariable String recipeId, @RequestParam String userId) {
+        try {
+            favoriteService.removeFavorite(userId, recipeId);
+            return ResponseEntity.ok("Recipe removed from favorites successfully!");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    
 }
