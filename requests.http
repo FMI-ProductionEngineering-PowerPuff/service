@@ -90,8 +90,8 @@ POST http://localhost:8080/api/auth/login
 Content-Type: application/json
 
 {
-  "email": "biancadogareci@gmail.com",
-  "password": "Bianc@2003"
+  "email": "ioanapoltog@gmail.com",
+  "password": "Ioan@2003"
 }
 
 ### Change password
@@ -204,3 +204,6 @@ DELETE http://localhost:8080/api/recipes/delete/{{recipeId}}?userId={{loggedInUs
 
 ### Get weekly
 GET http://localhost:8080/api/recipes/featured/{{loggedInUserId}}
+
+### Follow user
+@userIdToFollow = 67d7339be9a5b42f61e2d082

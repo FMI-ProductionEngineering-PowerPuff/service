@@ -5,6 +5,7 @@ import ro.unibuc.hello.service.AuthService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 
 import java.util.Optional;
 
@@ -21,20 +22,28 @@ public class AuthController {
 
     @PostMapping("/register")
     @ResponseBody
-    public UserEntity register(@RequestBody RegisterRequest request) {
-        UserEntity user = new UserEntity(
-                request.getUsername(),
-                request.getEmail(),
-                request.getPassword(),
-                request.getRole(),
-                request.getNickname(),
-                request.getBio(),
-                request.getAge(),
-                request.getAuthorization(),
-                request.getVegetarian()
-        );
-        return authService.register(user);
-    }
+    public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
+        try {
+            UserEntity user = new UserEntity(
+                    request.getUsername(),
+                    request.getEmail(),
+                    request.getPassword(),
+                    request.getRole(),
+                    request.getNickname(),
+                    request.getBio(),
+                    request.getAge(),
+                    request.getAuthorization(),
+                    request.getVegetarian()
+            );
+    
+            UserEntity registeredUser = authService.register(user);
+            return ResponseEntity.ok(registeredUser); // 200 OK if registration is successful
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage()); // 400 Bad Request for validation errors
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("An unexpected error occurred.");
+        }
+    }    
 
     @PostMapping("/login")
     @ResponseBody
@@ -45,10 +54,16 @@ public class AuthController {
 
     @PutMapping("/change-password")
     @ResponseBody
-    public String changePassword(@RequestBody ChangePasswordRequest request) {
-        boolean success = authService.changePassword(request.getEmail(), request.getOldPassword(), request.getNewPassword());
-        return success ? "Password changed successfully!" : "Invalid old password!";
-    }
+    public ResponseEntity<String> changePassword(@RequestBody ChangePasswordRequest request) {
+        try {
+            boolean success = authService.changePassword(request.getEmail(), request.getOldPassword(), request.getNewPassword());
+            return ResponseEntity.ok("Password changed successfully!");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage()); // Returns a 400 Bad Request with the specific error message
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("An unexpected error occurred.");
+        }
+    }    
 
     static class RegisterRequest {
         private String username;

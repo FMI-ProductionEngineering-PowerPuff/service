@@ -1,6 +1,11 @@
 package ro.unibuc.hello.service;
 
 import org.springframework.stereotype.Service;
+
+import ro.unibuc.hello.data.ContributorRepository;
+import ro.unibuc.hello.data.ContributorEntity;
+import ro.unibuc.hello.data.FollowEntity;
+import ro.unibuc.hello.data.FollowRepository;
 import ro.unibuc.hello.data.RecipeEntity;
 import ro.unibuc.hello.data.RecipeRepository;
 import ro.unibuc.hello.data.UserEntity;
@@ -9,6 +14,7 @@ import ro.unibuc.hello.data.UserRole;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -16,10 +22,14 @@ public class RecipeService {
 
     private final RecipeRepository recipeRepository;
     private final UserRepository userRepository;
+    private final FollowRepository followRepository;
+    private final ContributorRepository contributorRepository;
 
-    public RecipeService(RecipeRepository recipeRepository, UserRepository userRepository) {
+    public RecipeService(RecipeRepository recipeRepository, UserRepository userRepository, FollowRepository followRepository, ContributorRepository contributorRepository) {
         this.recipeRepository = recipeRepository;
         this.userRepository = userRepository;
+        this.followRepository = followRepository;
+        this.contributorRepository = contributorRepository;
     }
 
     public Optional<RecipeEntity> addRecipe(RecipeEntity recipe) {
@@ -105,6 +115,28 @@ public class RecipeService {
         return Optional.of(recipe);
     }
 
+    public List<RecipeEntity> getRecipesFromFollowedChefs(String userId) {
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found."));
+    
+        Set<String> followedChefIds = followRepository.findByUserFollower(userId)
+                .stream()
+                .map(FollowEntity::getUserFollowedId)
+                .collect(Collectors.toSet());
+    
+        System.out.println("Followed Chef IDs: " + followedChefIds);
+    
+        if (followedChefIds.isEmpty()) {
+            return List.of();
+        }
+    
+        List<RecipeEntity> recipes = recipeRepository.findByUserIdInOrderByFavoriteCountDesc(followedChefIds);
+    
+        System.out.println("Retrieved Recipes: " + recipes);
+    
+        return recipes;
+    }    
+
     public Optional<RecipeEntity> updateRecipe(String recipeId, String userId, RecipeEntity updatedRecipe) {
         Optional<RecipeEntity> recipeOpt = recipeRepository.findById(recipeId);
 
@@ -172,4 +204,65 @@ public class RecipeService {
                 .orElseThrow(() -> new IllegalArgumentException("No recipes found for this chef"));
     }
     
+    public String addContributor(String loggedInUserId, String chefId, String recipeId) {
+        RecipeEntity recipe = recipeRepository.findById(recipeId)
+                .orElseThrow(() -> new IllegalArgumentException("Recipe not found."));
+    
+        if (!recipe.getUserId().equals(loggedInUserId)) {
+            throw new IllegalArgumentException("You can only add contributors to recipes you own.");
+        }
+    
+        UserEntity chef = userRepository.findById(chefId)
+                .orElseThrow(() -> new IllegalArgumentException("Chef not found."));
+    
+        if (chef.getRole() != UserRole.CHEF) {
+            throw new IllegalArgumentException("Only chefs can be contributors.");
+        }
+    
+        if (!chef.getAuthorization()) {
+            throw new IllegalArgumentException("The chef must be authorized.");
+        }
+    
+        long recipeCount = recipeRepository.countByUserId(chefId);
+        if (recipeCount < 3) {
+            throw new IllegalArgumentException("The chef must have at least 3 recipes.");
+        }
+    
+        long followerCount = followRepository.countByUserFollowed(chefId);
+        if (followerCount < 2) {
+            throw new IllegalArgumentException("The chef must have at least 2 followers.");
+        }
+    
+        if (chef.getAge() < 18) {
+            throw new IllegalArgumentException("The chef must be at least 18 years old.");
+        }
+    
+        Optional<ContributorEntity> existingContributor = contributorRepository.findByUserIdAndRecipeId(chefId, recipeId);
+        if (existingContributor.isPresent()) {
+            throw new IllegalArgumentException("The chef is already a contributor to this recipe.");
+        }
+    
+        ContributorEntity newContributor = new ContributorEntity(chefId, recipeId);
+        contributorRepository.save(newContributor);
+    
+        return "Contributor added successfully.";
+    }
+    
+    public String removeContributor(String loggedInUserId, String chefId, String recipeId) {
+        RecipeEntity recipe = recipeRepository.findById(recipeId)
+                .orElseThrow(() -> new IllegalArgumentException("Recipe not found."));
+    
+        if (!recipe.getUserId().equals(loggedInUserId)) {
+            throw new IllegalArgumentException("You can only remove contributors from recipes you own.");
+        }
+    
+        Optional<ContributorEntity> contributor = contributorRepository.findByUserIdAndRecipeId(chefId, recipeId);
+        if (contributor.isEmpty()) {
+            throw new IllegalArgumentException("This user is not a contributor for the recipe.");
+        }
+    
+        contributorRepository.deleteByUserIdAndRecipeId(chefId, recipeId);
+        return "Contributor removed successfully.";
+    }    
+
 }

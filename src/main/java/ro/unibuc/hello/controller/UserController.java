@@ -27,7 +27,7 @@ public class UserController {
 
     @PutMapping("/update/{id}")
     public ResponseEntity<UserEntity> updateUserProfile(@PathVariable String id, @RequestBody UpdateUserRequest request) {
-        Optional<UserEntity> updatedUser = userService.updateUser(id, request.getUsername(), request.getEmail(), request.getNickname(), request.getBio(), request.getAge(), request.getVegetarian());
+        Optional<UserEntity> updatedUser = userService.updateUser(id, request.getUsername(), request.getEmail(), request.getNickname(), request.getBio(), request.getVegetarian());
         return updatedUser.map(ResponseEntity::ok)
                           .orElseGet(() -> ResponseEntity.notFound().build());
     }
@@ -40,12 +40,21 @@ public class UserController {
         return ResponseEntity.notFound().build();
     }
 
+    @PostMapping("/follow/{id-user}")
+    public ResponseEntity<String> followUser(@PathVariable("id-user") String userId, @RequestParam String followerId) {
+        String result = userService.followUser(followerId, userId);
+        if (result.equals("Successfully followed the chef!")) {
+            return ResponseEntity.ok(result);
+        } else {
+            return ResponseEntity.badRequest().body(result);
+        }
+    }
+    
     static class UpdateUserRequest {
         private String username;
         private String email;
         private String nickname;
         private String bio;
-        private Integer age;
         private Boolean vegetarian;
 
         public String getUsername() { return username; }
@@ -56,8 +65,6 @@ public class UserController {
         public void setNickname(String nickname) { this.nickname = nickname; }
         public String getBio() { return bio; }
         public void setBio(String bio) { this.bio = bio; }
-        public Integer getAge() { return age; }
-        public void setAge(Integer age) { this.age = age; }
         public Boolean getVegetarian() { return vegetarian; }
         public void setVegetarian(Boolean vegetarian) { this.vegetarian = vegetarian; }
     }

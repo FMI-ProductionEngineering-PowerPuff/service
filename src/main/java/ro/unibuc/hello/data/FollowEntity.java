@@ -34,7 +34,7 @@ public class FollowEntity {
     }
 
     public String getUserFollowedId() {
-        return id;
+        return userFollowed;
     }
 
     public void setUserFollowedId(String userFollowed) {
