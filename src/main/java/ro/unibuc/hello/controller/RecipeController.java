@@ -55,6 +55,12 @@ public class RecipeController {
         }
     }
 
+    @GetMapping("/get-recipes-by-followed-chefs")
+    public ResponseEntity<List<RecipeEntity>> getRecipesFromFollowedChefs(@RequestParam String userId) {
+        List<RecipeEntity> recipes = recipeService.getRecipesFromFollowedChefs(userId);
+        return ResponseEntity.ok(recipes);
+    }
+
     @PutMapping("/update/{recipeId}")
     public ResponseEntity<?> updateRecipe(@PathVariable String recipeId, 
                                         @RequestParam("userId") String userId, 
@@ -81,6 +87,26 @@ public class RecipeController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("An error occurred while deleting the recipe.");
+        }
+    }
+
+    @PostMapping("/add-contributor")
+    public ResponseEntity<String> addContributor(@RequestParam String loggedInUserId, @RequestParam String chefId, @RequestParam String recipeId) {
+        try {
+            String result = recipeService.addContributor(loggedInUserId, chefId, recipeId);
+            return ResponseEntity.ok(result);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/remove-contributor")
+    public ResponseEntity<String> removeContributor(@RequestParam String loggedInUserId, @RequestParam String chefId, @RequestParam String recipeId) {
+        try {
+            String result = recipeService.removeContributor(loggedInUserId, chefId, recipeId);
+            return ResponseEntity.ok(result);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 

@@ -20,15 +20,31 @@ public class AuthService {
 
     public UserEntity register(UserEntity user) {
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-            throw new RuntimeException("Email already in use");
+            throw new IllegalArgumentException("Email already in use.");
         }
-
+    
+        if (!validatePassword(user.getPassword())) {
+            throw new IllegalArgumentException("Password must have at least one uppercase letter, one number, and a minimum length of 8 characters.");
+        }
+    
+        if (user.getAge() < 18 && user.getRole() == UserRole.CHEF) {
+            throw new IllegalArgumentException("Chef must be 18+.");
+        }
+    
         user.setPassword(hashPassword(user.getPassword()));
+    
         if (user.getRole() == null) {
             user.setRole(UserRole.USER);
         }
-
+    
         return userRepository.save(user);
+    }    
+
+    public boolean validatePassword(String password) {
+        if (password == null) {
+            return false;
+        }
+        return password.matches("^(?=.*[A-Z])(?=.*\\d).{8,}$");
     }
 
     public Optional<UserEntity> login(String email, String password) {
@@ -38,17 +54,25 @@ public class AuthService {
 
     public boolean changePassword(String email, String oldPassword, String newPassword) {
         Optional<UserEntity> userOpt = userRepository.findByEmail(email);
-
-        if (userOpt.isPresent()) {
-            UserEntity user = userOpt.get();
-            if (user.getPassword().equals(hashPassword(oldPassword))) {
-                user.setPassword(hashPassword(newPassword));
-                userRepository.save(user);
-                return true;
-            }
+    
+        if (userOpt.isEmpty()) {
+            throw new IllegalArgumentException("User not found.");
         }
-        return false;
-    }
+    
+        UserEntity user = userOpt.get();
+    
+        if (!validatePassword(newPassword)) {
+            throw new IllegalArgumentException("Password must have at least one uppercase letter, one number, and a minimum length of 8 characters.");
+        }
+    
+        if (!user.getPassword().equals(hashPassword(oldPassword))) {
+            throw new IllegalArgumentException("Invalid old password.");
+        }
+    
+        user.setPassword(hashPassword(newPassword));
+        userRepository.save(user);
+        return true;
+    }    
 
     private String hashPassword(String password) {
         try {

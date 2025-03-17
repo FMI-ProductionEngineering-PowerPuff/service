@@ -4,7 +4,7 @@ Our Recipe Sharing Platform is a Java Spring Boot web service for discovering, s
 
 ## User Authentication & Profile & Contributors
 
-- Register a new user/chef (chef must be 18+)
+- Register a new user/chef (unique email, chef must be 18+)
 - Login a user
 - Change password (must have at least one uppercase letter, one number and a minimum length of 8 characters)
 - Get user profile
@@ -12,6 +12,7 @@ Our Recipe Sharing Platform is a Java Spring Boot web service for discovering, s
 - Delete user profile
 - Follow user (users can follow chefs and only chefs can be followed)
 - Add contributor to recipe (to be a contributor you need to be an authorized chef with at least 3 recipes posted and a following of 2 and 18+)
+- Remove contributor
 - Get recipes from chefs you follow
 
 ## Recipe Management & Favorites
@@ -22,7 +23,7 @@ Our Recipe Sharing Platform is a Java Spring Boot web service for discovering, s
 - Update a recipe (only the author or contributors can update a recipe)
 - Delete a recipe
 - Change frozen status (only the author can change it)
-- Weekly recipe (from an authorized chef with at least 3 recipes, at least 4 likes)
+- Featured recipe for each chef account (must be authorized, with at least 3 recipes and at least 4 likes in total)
 - Add recipe to favorites (only users)
 - Remove recipe from favorites
 - Get favorite recipes of a user
