@@ -84,4 +84,14 @@ public class RecipeController {
         }
     }
 
+    @GetMapping("/featured/{userId}")
+    public ResponseEntity<?> getFeaturedRecipe(@PathVariable String userId) {
+        try {
+            RecipeEntity featuredRecipe = recipeService.getFeaturedRecipe(userId);
+            return ResponseEntity.ok(featuredRecipe);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
 }

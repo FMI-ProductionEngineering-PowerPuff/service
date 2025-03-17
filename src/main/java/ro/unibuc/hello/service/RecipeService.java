@@ -39,9 +39,9 @@ public class RecipeService {
         // Orice reteta abia postata nu e frozen
         recipe.setFrozen(false);
 
-        // type poate sa fie Drink sau Food
-        if (!recipe.getType().equalsIgnoreCase("Drink") && !recipe.getType().equalsIgnoreCase("Food")) {
-            throw new IllegalArgumentException("Invalid type. Type must be 'Drink' or 'Food'.");
+        // type poate sa fie Food, Alcoholic-Drink sau Non-Alcoholic-Drink
+        if (!recipe.getType().equalsIgnoreCase("Alcoholic-Drink") && !recipe.getType().equalsIgnoreCase("Non-Alcoholic-Drink") && !recipe.getType().equalsIgnoreCase("Food")) {
+            throw new IllegalArgumentException("Invalid type. Type must be 'Food', 'Alcoholic-Drink' or Non-Alcoholic-Drink'.");
         }
 
         return Optional.of(recipeRepository.save(recipe));
@@ -74,7 +74,7 @@ public class RecipeService {
 
         if (user.getAge() < 18) {
             recipes = recipes.stream()
-                    .filter(recipe -> !recipe.getType().equalsIgnoreCase("Drink"))
+                    .filter(recipe -> !recipe.getType().equalsIgnoreCase("Alcoholic-Drink"))
                     .collect(Collectors.toList());
         }
 
@@ -94,8 +94,8 @@ public class RecipeService {
         RecipeEntity recipe = recipeRepository.findById(recipeId)
                 .orElseThrow(() -> new IllegalArgumentException("Recipe not found."));
 
-        if ("Drink".equalsIgnoreCase(recipe.getType()) && user.getAge() < 18) {
-            throw new IllegalArgumentException("You must be 18+ to view this drink recipe.");
+        if ("Alcoholic-Drink".equalsIgnoreCase(recipe.getType()) && user.getAge() < 18) {
+            throw new IllegalArgumentException("You must be 18+ to view this alcoholic drink recipe.");
         }
 
         if (user.getVegetarian() && !recipe.getVegetarian()) {
@@ -114,10 +114,10 @@ public class RecipeService {
 
         RecipeEntity existingRecipe = recipeOpt.get();
 
-        // trebuie adaugata verificarea ca user-ul sa faca parte din contributors la reteta (cand o sa avem contributors)
+        // trebuie adaugata verificarea ca user-ul sa faca parte din contributors la reteta (cand o sa avem contributors) sau sa fie autorul retetei
 
         if (!updatedRecipe.getType().equalsIgnoreCase("Food") && !updatedRecipe.getType().equalsIgnoreCase("Drink")) {
-            throw new IllegalArgumentException("Invalid type. Type must be 'Food' or 'Drink'.");
+            throw new IllegalArgumentException("Invalid type. Type must be 'Food', 'Alcoholic-Drink' or 'Non-Alcoholic-Drink'.");
         }
 
         existingRecipe.setName(updatedRecipe.getName());
@@ -148,6 +148,28 @@ public class RecipeService {
         }
     
         recipeRepository.delete(recipe);
+    }
+
+    public RecipeEntity getFeaturedRecipe(String userId) {
+        // User trb sa fie un CHEF autorizat
+        UserEntity chef = userRepository.findByIdAndRoleAndAuthorization(userId, UserRole.CHEF, true)
+                .orElseThrow(() -> new IllegalArgumentException("User is not an authorized chef"));
+
+        // sa aiba cel putin 3 retete postate
+        long recipeCount = recipeRepository.countByUserId(userId);
+        if (recipeCount < 3) {
+            throw new IllegalArgumentException("Chef must have at least 3 recipes to have a featured recipe");
+        }
+
+        // sa fi primit cel putin 4 like-uri
+        long totalLikes = recipeRepository.getTotalLikesByUserId(userId).orElse(0L);
+
+        if (totalLikes < 4) {
+            throw new IllegalArgumentException("Chef's recipes must have at least 4 likes in total");
+        }
+
+        return recipeRepository.findRandomRecipeByUserId(userId)
+                .orElseThrow(() -> new IllegalArgumentException("No recipes found for this chef"));
     }
     
 }
