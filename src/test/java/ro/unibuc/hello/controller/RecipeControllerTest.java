@@ -164,6 +164,34 @@ class RecipeControllerTest {
             .andExpect(jsonPath("$[1].name").value("Dish 2"));
     }
 
+    @Test
+    void test_getRecipesByCategory_success() throws Exception {
+        RecipeEntity recipe1 = new RecipeEntity();
+        recipe1.setName("Pizza");
+        RecipeEntity recipe2 = new RecipeEntity();
+        recipe2.setName("Burger");
+
+        when(recipeService.getRecipesByCategorySortedByPopularity("Fast Food"))
+                .thenReturn(List.of(recipe1, recipe2));
+
+        mockMvc.perform(get("/api/recipes/category")
+                        .param("category", "Fast Food"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].name").value("Pizza"))
+                .andExpect(jsonPath("$[1].name").value("Burger"));
+        }
+
+    @Test
+    void test_getRecipesByCategory_failure() throws Exception {
+        when(recipeService.getRecipesByCategorySortedByPopularity("Unknown"))
+                .thenThrow(new IllegalArgumentException("Category not found"));
+
+        mockMvc.perform(get("/api/recipes/category")
+                        .param("category", "Unknown"))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("Category not found"));
+        }
 
 
     @Test

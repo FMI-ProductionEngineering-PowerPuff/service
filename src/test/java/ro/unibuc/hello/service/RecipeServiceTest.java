@@ -361,6 +361,36 @@ class RecipeServiceTest {
         assertTrue(result.isEmpty());
     }
 
+    @Test
+    void test_getRecipesByCategorySortedByPopularity_success() {
+        RecipeEntity r1 = new RecipeEntity();
+        r1.setName("Pizza");
+        r1.setFavoriteCount(10);
+
+        RecipeEntity r2 = new RecipeEntity();
+        r2.setName("Burger");
+        r2.setFavoriteCount(5);
+
+        when(recipeRepository.findByCategoryOrderByFavoriteCountDesc("Fast Food"))
+                .thenReturn(List.of(r1, r2));
+
+        List<RecipeEntity> result = recipeService.getRecipesByCategorySortedByPopularity("Fast Food");
+
+        assertEquals(2, result.size());
+        assertEquals("Pizza", result.get(0).getName());
+        assertEquals("Burger", result.get(1).getName());
+    }
+
+    @Test
+    void test_getRecipesByCategorySortedByPopularity_failure_noRecipes() {
+        when(recipeRepository.findByCategoryOrderByFavoriteCountDesc("Unknown"))
+                .thenReturn(List.of());
+
+        Exception ex = assertThrows(IllegalArgumentException.class, () ->
+                recipeService.getRecipesByCategorySortedByPopularity("Unknown"));
+
+        assertEquals("No recipes found for this category.", ex.getMessage());
+    }
 
 
     @Test
