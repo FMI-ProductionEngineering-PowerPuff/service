@@ -157,9 +157,20 @@ public class RecipeService {
 
         RecipeEntity existingRecipe = recipeOpt.get();
 
-        // trebuie adaugata verificarea ca user-ul sa faca parte din contributors la reteta (cand o sa avem contributors) sau sa fie autorul retetei
+        // verificam daca user-ul e autor sau contributor
+        boolean isAuthor = existingRecipe.getUserId().equals(userId);
+        boolean isContributor = contributorRepository
+                                    .findByUserIdAndRecipeId(userId, recipeId)
+                                    .isPresent();
 
-        if (!updatedRecipe.getType().equalsIgnoreCase("Food") && !updatedRecipe.getType().equalsIgnoreCase("Drink")) {
+        if (!isAuthor && !isContributor) {
+            throw new IllegalArgumentException("Only the author and contributors can update this recipe.");
+        }
+
+        // Type poate sa fie "Food", "Alcoholic-Drink" sau "Non-Alcoholic-Drink"
+        if (!updatedRecipe.getType().equalsIgnoreCase("Food") &&
+            !updatedRecipe.getType().equalsIgnoreCase("Alcoholic-Drink") &&
+            !updatedRecipe.getType().equalsIgnoreCase("Non-Alcoholic-Drink")) {
             throw new IllegalArgumentException("Invalid type. Type must be 'Food', 'Alcoholic-Drink' or 'Non-Alcoholic-Drink'.");
         }
 
@@ -171,7 +182,6 @@ public class RecipeService {
         existingRecipe.setVegetarian(updatedRecipe.getVegetarian());
         existingRecipe.setFrozen(updatedRecipe.getFrozen());
 
-        // Save the updated recipe to the database
         return Optional.of(recipeRepository.save(existingRecipe));
     }
 
