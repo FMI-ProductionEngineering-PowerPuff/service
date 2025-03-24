@@ -147,6 +147,26 @@ class RecipeControllerTest {
 
 
     @Test
+    void test_getRecipesFromFollowedChefs_success() throws Exception {
+        RecipeEntity recipe1 = new RecipeEntity();
+        recipe1.setName("Dish 1");
+        RecipeEntity recipe2 = new RecipeEntity();
+        recipe2.setName("Dish 2");
+
+        when(recipeService.getRecipesFromFollowedChefs("user123"))
+            .thenReturn(List.of(recipe1, recipe2));
+
+        mockMvc.perform(get("/api/recipes/get-recipes-by-followed-chefs")
+                    .param("userId", "user123"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.length()").value(2))
+            .andExpect(jsonPath("$[0].name").value("Dish 1"))
+            .andExpect(jsonPath("$[1].name").value("Dish 2"));
+    }
+
+
+
+    @Test
     void test_updateRecipe_success() throws Exception {
         RecipeEntity recipe = new RecipeEntity();
         recipe.setName("Cake");
@@ -199,6 +219,63 @@ class RecipeControllerTest {
                         .param("userId", "user123"))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string("Only the author can delete this recipe."));
+    }
+
+
+
+    // Contributor
+    @Test
+    void test_addContributor_success() throws Exception {
+        when(recipeService.addContributor("user123", "chef456", "recipe789"))
+                .thenReturn("Contributor added successfully");
+        
+        mockMvc.perform(post("/api/recipes/add-contributor")
+                .param("loggedInUserId", "user123")
+                .param("chefId", "chef456")
+                .param("recipeId", "recipe789"))
+        .andExpect(status().isOk())
+        .andExpect(content().string("Contributor added successfully"));
+    }
+
+    @Test
+    void test_addContributor_failure() throws Exception {
+        when(recipeService.addContributor("user123", "chef456", "recipe789"))
+                .thenThrow(new IllegalArgumentException("Invalid contributor"));
+
+        mockMvc.perform(post("/api/recipes/add-contributor")
+                        .param("loggedInUserId", "user123")
+                        .param("chefId", "chef456")
+                        .param("recipeId", "recipe789"))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("Invalid contributor"));
+    }
+
+
+
+    @Test
+    void test_removeContributor_success() throws Exception {
+        when(recipeService.removeContributor("user123", "chef456", "recipe789"))
+                .thenReturn("Contributor removed successfully");
+
+        mockMvc.perform(delete("/api/recipes/remove-contributor")
+                .param("loggedInUserId", "user123")
+                .param("chefId", "chef456")
+                .param("recipeId", "recipe789"))
+        .andExpect(status().isOk())
+        .andExpect(content().string("Contributor removed successfully"));
+    }
+
+    @Test
+    void test_removeContributor_failure() throws Exception {
+        when(recipeService.removeContributor("user123", "chef456", "recipe789"))
+                .thenThrow(new IllegalArgumentException("Unauthorized"));
+
+        mockMvc.perform(delete("/api/recipes/remove-contributor")
+                .param("loggedInUserId", "user123")
+                .param("chefId", "chef456")
+                .param("recipeId", "recipe789"))
+        .andExpect(status().isBadRequest())
+        .andExpect(content().string("Unauthorized"));
     }
 
 

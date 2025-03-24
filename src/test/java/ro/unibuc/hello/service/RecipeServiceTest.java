@@ -315,6 +315,55 @@ class RecipeServiceTest {
 
 
     @Test
+    void test_getRecipesFromFollowedChefs_success() {
+        UserEntity user = new UserEntity();
+        user.setId("user123");
+
+        FollowEntity follow1 = new FollowEntity("user123", "chef1");
+        FollowEntity follow2 = new FollowEntity("user123", "chef2");
+
+        RecipeEntity recipe1 = new RecipeEntity();
+        recipe1.setUserId("chef1");
+        RecipeEntity recipe2 = new RecipeEntity();
+        recipe2.setUserId("chef2");
+
+        when(userRepository.findById("user123")).thenReturn(Optional.of(user));
+        when(followRepository.findByUserFollower("user123")).thenReturn(List.of(follow1, follow2));
+        when(recipeRepository.findByUserIdInOrderByFavoriteCountDesc(Set.of("chef1", "chef2")))
+                .thenReturn(List.of(recipe1, recipe2));
+
+        List<RecipeEntity> result = recipeService.getRecipesFromFollowedChefs("user123");
+
+        assertEquals(2, result.size());
+    }
+
+    // user-ul nu exista
+    @Test
+    void test_getRecipesFromFollowedChefs_failure_userNotFound() {
+        when(userRepository.findById("user123")).thenReturn(Optional.empty());
+
+        Exception ex = assertThrows(IllegalArgumentException.class, () ->
+                recipeService.getRecipesFromFollowedChefs("user123"));
+
+        assertEquals("User not found.", ex.getMessage());
+    }
+
+    @Test
+    void test_getRecipesFromFollowedChefs_emptyFollowList() {
+        UserEntity user = new UserEntity();
+        user.setId("user123");
+
+        when(userRepository.findById("user123")).thenReturn(Optional.of(user));
+        when(followRepository.findByUserFollower("user123")).thenReturn(List.of());
+
+        List<RecipeEntity> result = recipeService.getRecipesFromFollowedChefs("user123");
+
+        assertTrue(result.isEmpty());
+    }
+
+
+
+    @Test
     void test_updateRecipe_success_asAuthor() {
         RecipeEntity existing = new RecipeEntity();
         existing.setId("recipe123");
@@ -431,6 +480,214 @@ class RecipeServiceTest {
                 recipeService.deleteRecipe("recipe123", "user123"));
 
         assertEquals("Only the author can delete this recipe.", exception.getMessage());
+    }
+
+
+
+    @Test
+    void test_addContributor_success() {
+        RecipeEntity recipe = new RecipeEntity();
+        recipe.setId("recipe123");
+        recipe.setUserId("ownerId");
+
+        UserEntity chef = new UserEntity();
+        chef.setId("chef456");
+        chef.setRole(UserRole.CHEF);
+        chef.setAuthorization(true);
+        chef.setAge(30);
+
+        when(recipeRepository.findById("recipe123")).thenReturn(Optional.of(recipe));
+        when(userRepository.findById("chef456")).thenReturn(Optional.of(chef));
+        when(recipeRepository.countByUserId("chef456")).thenReturn(3L);
+        when(followRepository.countByUserFollowed("chef456")).thenReturn(2L);
+        when(contributorRepository.findByUserIdAndRecipeId("chef456", "recipe123")).thenReturn(Optional.empty());
+
+        String result = recipeService.addContributor("ownerId", "chef456", "recipe123");
+
+        assertEquals("Contributor added successfully.", result);
+        verify(contributorRepository).save(any(ContributorEntity.class));
+    }
+    
+    // user-ul logat nu este autorul
+    @Test
+    void test_addContributor_failure_notAuthor() {
+        RecipeEntity recipe = new RecipeEntity();
+        recipe.setId("recipe123");
+        recipe.setUserId("otherUser");
+
+        when(recipeRepository.findById("recipe123")).thenReturn(Optional.of(recipe));
+
+        Exception ex = assertThrows(IllegalArgumentException.class, () ->
+                recipeService.addContributor("notOwner", "chef456", "recipe123"));
+
+        assertEquals("You can only add contributors to recipes you own.", ex.getMessage());
+    }
+    
+    // user-ul este deja contributor
+    @Test
+    void test_addContributor_failure_chefAlreadyContributor() {
+        RecipeEntity recipe = new RecipeEntity();
+        recipe.setId("recipe123");
+        recipe.setUserId("ownerId");
+
+        UserEntity chef = new UserEntity();
+        chef.setId("chef456");
+        chef.setRole(UserRole.CHEF);
+        chef.setAuthorization(true);
+        chef.setAge(30);
+
+        when(recipeRepository.findById("recipe123")).thenReturn(Optional.of(recipe));
+        when(userRepository.findById("chef456")).thenReturn(Optional.of(chef));
+        when(recipeRepository.countByUserId("chef456")).thenReturn(3L);
+        when(followRepository.countByUserFollowed("chef456")).thenReturn(2L);
+        when(contributorRepository.findByUserIdAndRecipeId("chef456", "recipe123"))
+                .thenReturn(Optional.of(new ContributorEntity("chef456", "recipe123")));
+
+        Exception ex = assertThrows(IllegalArgumentException.class, () ->
+                recipeService.addContributor("ownerId", "chef456", "recipe123"));
+
+        assertEquals("The chef is already a contributor to this recipe.", ex.getMessage());
+    }
+
+    // user-ul ales sa fie contributor nu este CHEF 
+    @Test
+    void test_addContributor_failure_userNotChef() {
+        RecipeEntity recipe = new RecipeEntity();
+        recipe.setId("recipe123");
+        recipe.setUserId("ownerId");
+
+        UserEntity user = new UserEntity();
+        user.setId("user456");
+        user.setRole(UserRole.USER);
+
+        when(recipeRepository.findById("recipe123")).thenReturn(Optional.of(recipe));
+        when(userRepository.findById("user456")).thenReturn(Optional.of(user));
+
+        Exception ex = assertThrows(IllegalArgumentException.class, () ->
+                recipeService.addContributor("ownerId", "user456", "recipe123"));
+
+        assertEquals("Only chefs can be contributors.", ex.getMessage());
+    }
+
+    // chef-ul ales sa fie contributor nu are 3 retete
+    @Test
+    void test_addContributor_failure_notEnoughRecipes() {
+        RecipeEntity recipe = new RecipeEntity();
+        recipe.setId("recipe123");
+        recipe.setUserId("ownerId");
+
+        UserEntity chef = new UserEntity();
+        chef.setId("chef456");
+        chef.setRole(UserRole.CHEF);
+        chef.setAuthorization(true);
+        chef.setAge(30);
+
+        when(recipeRepository.findById("recipe123")).thenReturn(Optional.of(recipe));
+        when(userRepository.findById("chef456")).thenReturn(Optional.of(chef));
+        when(recipeRepository.countByUserId("chef456")).thenReturn(2L);
+
+        Exception ex = assertThrows(IllegalArgumentException.class, () ->
+                recipeService.addContributor("ownerId", "chef456", "recipe123"));
+
+        assertEquals("The chef must have at least 3 recipes.", ex.getMessage());
+    }
+
+    // chef-ul ales sa fie contributor are mai putin de 2 followers
+    @Test
+    void test_addContributor_failure_notEnoughFollowers() {
+        RecipeEntity recipe = new RecipeEntity();
+        recipe.setId("recipe123");
+        recipe.setUserId("ownerId");
+
+        UserEntity chef = new UserEntity();
+        chef.setId("chef456");
+        chef.setRole(UserRole.CHEF);
+        chef.setAuthorization(true);
+        chef.setAge(30);
+
+        when(recipeRepository.findById("recipe123")).thenReturn(Optional.of(recipe));
+        when(userRepository.findById("chef456")).thenReturn(Optional.of(chef));
+        when(recipeRepository.countByUserId("chef456")).thenReturn(3L);
+        when(followRepository.countByUserFollowed("chef456")).thenReturn(1L);
+
+        Exception ex = assertThrows(IllegalArgumentException.class, () ->
+                recipeService.addContributor("ownerId", "chef456", "recipe123"));
+
+        assertEquals("The chef must have at least 2 followers.", ex.getMessage());
+    }
+
+    // chef-ul ales sa fie contributor are sub 18 ani
+    @Test
+    void test_addContributor_failure_underageChef() {
+        RecipeEntity recipe = new RecipeEntity();
+        recipe.setId("recipe123");
+        recipe.setUserId("ownerId");
+
+        UserEntity chef = new UserEntity();
+        chef.setId("chef456");
+        chef.setRole(UserRole.CHEF);
+        chef.setAuthorization(true);
+        chef.setAge(17); // underage
+
+        when(recipeRepository.findById("recipe123")).thenReturn(Optional.of(recipe));
+        when(userRepository.findById("chef456")).thenReturn(Optional.of(chef));
+        when(recipeRepository.countByUserId("chef456")).thenReturn(3L);
+        when(followRepository.countByUserFollowed("chef456")).thenReturn(2L);
+
+        Exception ex = assertThrows(IllegalArgumentException.class, () ->
+                recipeService.addContributor("ownerId", "chef456", "recipe123"));
+
+        assertEquals("The chef must be at least 18 years old.", ex.getMessage());
+    }
+
+
+
+    @Test
+    void test_removeContributor_success() {
+        RecipeEntity recipe = new RecipeEntity();
+        recipe.setId("recipe123");
+        recipe.setUserId("ownerId");
+
+        when(recipeRepository.findById("recipe123")).thenReturn(Optional.of(recipe));
+        when(contributorRepository.findByUserIdAndRecipeId("chef456", "recipe123"))
+                .thenReturn(Optional.of(new ContributorEntity("chef456", "recipe123")));
+
+        String result = recipeService.removeContributor("ownerId", "chef456", "recipe123");
+
+        assertEquals("Contributor removed successfully.", result);
+        verify(contributorRepository).deleteByUserIdAndRecipeId("chef456", "recipe123");
+    }
+
+    // user-ul logat nu este autorul
+    @Test
+    void test_removeContributor_failure_notAuthor() {
+        RecipeEntity recipe = new RecipeEntity();
+        recipe.setId("recipe123");
+        recipe.setUserId("ownerId");
+
+        when(recipeRepository.findById("recipe123")).thenReturn(Optional.of(recipe));
+
+        Exception ex = assertThrows(IllegalArgumentException.class, () ->
+                recipeService.removeContributor("anotherUser", "chef456", "recipe123"));
+
+        assertEquals("You can only remove contributors from recipes you own.", ex.getMessage());
+    }
+
+    // user-ul nu este contributor
+    @Test
+    void test_removeContributor_failure_notContributor() {
+        RecipeEntity recipe = new RecipeEntity();
+        recipe.setId("recipe123");
+        recipe.setUserId("ownerId");
+
+        when(recipeRepository.findById("recipe123")).thenReturn(Optional.of(recipe));
+        when(contributorRepository.findByUserIdAndRecipeId("chef456", "recipe123"))
+                .thenReturn(Optional.empty());
+
+        Exception ex = assertThrows(IllegalArgumentException.class, () ->
+                recipeService.removeContributor("ownerId", "chef456", "recipe123"));
+
+        assertEquals("This user is not a contributor for the recipe.", ex.getMessage());
     }
 
 
