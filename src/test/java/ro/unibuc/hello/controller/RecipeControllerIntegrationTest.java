@@ -19,6 +19,8 @@ import ro.unibuc.hello.data.UserEntity;
 import ro.unibuc.hello.data.UserRepository;
 import ro.unibuc.hello.data.UserRole;
 import ro.unibuc.hello.service.RecipeService;
+import ro.unibuc.hello.data.FollowEntity;
+import ro.unibuc.hello.data.FollowRepository;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -66,6 +68,9 @@ public class RecipeControllerIntegrationTest {
     private UserRepository userRepository;
 
     @Autowired
+    private FollowRepository followRepository;
+
+    @Autowired
     private RecipeRepository recipeRepository;
 
     @Autowired
@@ -102,6 +107,7 @@ public class RecipeControllerIntegrationTest {
         objectMapper.registerModule(new JavaTimeModule()); // pt variabilele instant
         recipeRepository.deleteAll();
         userRepository.deleteAll();
+        followRepository.deleteAll();
 
         UserEntity chef = new UserEntity("chef", "chef@example.com", "pass", UserRole.CHEF, "Chef", "Bio", 40, true, false);
         String savedChefId = userRepository.save(chef).getId(); // real ID
@@ -501,4 +507,114 @@ public class RecipeControllerIntegrationTest {
                 .andExpect(content().string("Recipe not found"));
     }
 
+    @Test
+    void testChefAddsValidContributorChef() throws Exception {
+        // contributor chef
+        UserEntity chefContributor = new UserEntity("chefContributor", "contrib@example.com", "pass", UserRole.CHEF, "ContribChef", "Bio", 35, true, true);
+        String chefContributorId = userRepository.save(chefContributor).getId();
+
+        // add 2 followers for contributor
+        UserEntity follower1 = new UserEntity("f1", "f1@example.com", "pass", UserRole.USER, "F1", "Bio", 20, true, true);
+        UserEntity follower2 = new UserEntity("f2", "f2@example.com", "pass", UserRole.USER, "F2", "Bio", 22, true, true);
+        String f1Id = userRepository.save(follower1).getId();
+        String f2Id = userRepository.save(follower2).getId();
+
+        followRepository.save(new FollowEntity(f1Id, chefContributorId));
+        followRepository.save(new FollowEntity(f2Id, chefContributorId));
+
+        // add 3 recipes for the contributor
+        for (int i = 1; i <= 3; i++) {
+            RecipeEntity recipe = new RecipeEntity();
+            recipe.setUserId(chefContributorId);
+            recipe.setName("Contributor Recipe " + i);
+            recipe.setDescription("Yummy");
+            recipe.setPhoto("photo" + i + ".jpg");
+            recipe.setCategory("Main");
+            recipe.setType("Food");
+            recipe.setVegetarian(true);
+            recipe.setFrozen(false);
+            recipe.setFavoriteCount(1);
+            recipeRepository.save(recipe);
+        }
+
+        // create a recipe owned by the chefOwner
+        RecipeEntity ownerRecipe = new RecipeEntity();
+        ownerRecipe.setUserId(TEST_USER_ID_CHEF);
+        ownerRecipe.setName("Owner's Recipe");
+        ownerRecipe.setDescription("Great");
+        ownerRecipe.setPhoto("owner.jpg");
+        ownerRecipe.setCategory("Main");
+        ownerRecipe.setType("Food");
+        ownerRecipe.setVegetarian(false);
+        ownerRecipe.setFrozen(false);
+        ownerRecipe.setFavoriteCount(0);
+        String recipeId = recipeRepository.save(ownerRecipe).getId();
+
+        mockMvc.perform(post("/api/recipes/add-contributor")
+                .param("loggedInUserId", TEST_USER_ID_CHEF)
+                .param("chefId", chefContributorId)
+                .param("recipeId", recipeId))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Contributor added successfully."));
+    }
+
+    @Test
+    void testChefRemovesContributorChef() throws Exception {
+        // contributor chef
+        UserEntity chefContributor = new UserEntity("chefContributor2", "contrib2@example.com", "pass", UserRole.CHEF, "ContribChef2", "Bio", 36, true, true);
+        String chefContributorId = userRepository.save(chefContributor).getId();
+
+        // add 2 followers
+        UserEntity f1 = new UserEntity("f3", "f3@example.com", "pass", UserRole.USER, "F3", "Bio", 21, true, true);
+        UserEntity f2 = new UserEntity("f4", "f4@example.com", "pass", UserRole.USER, "F4", "Bio", 22, true, true);
+        String f1Id = userRepository.save(f1).getId();
+        String f2Id = userRepository.save(f2).getId();
+
+        followRepository.save(new FollowEntity(f1Id, chefContributorId));
+        followRepository.save(new FollowEntity(f2Id, chefContributorId));
+
+        // add 3 recipes to qualify as a contributor
+        for (int i = 1; i <= 3; i++) {
+            RecipeEntity recipe = new RecipeEntity();
+            recipe.setUserId(chefContributorId);
+            recipe.setName("Cont Recipe " + i);
+            recipe.setDescription("Recipe " + i);
+            recipe.setPhoto("img" + i + ".jpg");
+            recipe.setCategory("Main");
+            recipe.setType("Food");
+            recipe.setVegetarian(false);
+            recipe.setFrozen(false);
+            recipe.setFavoriteCount(i);
+            recipeRepository.save(recipe);
+        }
+
+        // recipe owned by TEST_USER_ID_CHEF
+        RecipeEntity ownerRecipe = new RecipeEntity();
+        ownerRecipe.setUserId(TEST_USER_ID_CHEF);
+        ownerRecipe.setName("Owned Recipe");
+        ownerRecipe.setDescription("Something");
+        ownerRecipe.setPhoto("photo.jpg");
+        ownerRecipe.setCategory("Main");
+        ownerRecipe.setType("Food");
+        ownerRecipe.setVegetarian(false);
+        ownerRecipe.setFrozen(false);
+        ownerRecipe.setFavoriteCount(0);
+        String recipeId = recipeRepository.save(ownerRecipe).getId();
+
+        // add contributor
+        mockMvc.perform(post("/api/recipes/add-contributor")
+                .param("loggedInUserId", TEST_USER_ID_CHEF)
+                .param("chefId", chefContributorId)
+                .param("recipeId", recipeId))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Contributor added successfully."));
+
+        // remove contributor
+        mockMvc.perform(delete("/api/recipes/remove-contributor")
+                .param("loggedInUserId", TEST_USER_ID_CHEF)
+                .param("chefId", chefContributorId)
+                .param("recipeId", recipeId))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Contributor removed successfully."));
+    }
 }
