@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3">
+  <hashTree>
+    <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Add_Recipe">
+      <stringProp name="HTTPSampler.domain">verbose-space-funicular-w69r465grr43gv69.github.dev</stringProp>
+      <stringProp name="HTTPSampler.protocol">https</stringProp>
+      <stringProp name="HTTPSampler.path">api/recipes/add</stringProp>
+      <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+      <stringProp name="HTTPSampler.method">POST</stringProp>
+      <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+      <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+      <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+        <collectionProp name="Arguments.arguments">
+          <elementProp name="" elementType="HTTPArgument">
+            <boolProp name="HTTPArgument.always_encode">false</boolProp>
+            <stringProp name="Argument.value">{&#xd;
+  &quot;userId&quot;: &quot;67ebf5cb87eed92f1bc62a63&quot;,&#xd;
+  &quot;name&quot;: &quot;Meat&quot;,&#xd;
+  &quot;description&quot;: &quot;A delicious meal.&quot;,&#xd;
+  &quot;photo&quot;: &quot;https://chocolate-cake.jpg&quot;,&#xd;
+  &quot;category&quot;: &quot;Meal&quot;,&#xd;
+  &quot;type&quot;: &quot;Food&quot;,&#xd;
+  &quot;vegetarian&quot;: false&#xd;
+}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+        </collectionProp>
+      </elementProp>
+    </HTTPSamplerProxy>
+    <hashTree/>
+  </hashTree>
+</jmeterTestPlan>
