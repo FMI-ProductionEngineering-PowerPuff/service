@@ -1,7 +1,7 @@
 services:
   hello:
     image: hello-img
-    build: .
+    # build: .
     ports:
       - 8080:8080
       # Port for debug
@@ -13,7 +13,8 @@ services:
     profiles:
       - "hello-service"
   jenkins:
-    image: jenkins/jenkins
+    # image: jenkins/jenkins
+    image: biancadogareci/hello-img:${IMAGE_TAG}
     ports:
       - 8082:8080
       - 50000:50000
@@ -27,6 +28,8 @@ services:
     profiles:
       - "hello-service"
     user: 0:0
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
   mongo:
     image: mongo:6.0.20
     restart: always
