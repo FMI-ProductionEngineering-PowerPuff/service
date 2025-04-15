@@ -20,27 +20,22 @@ pipeline {
             steps {
                 script {
                     sh([script: 'git fetch --tag', returnStdout: true]).trim()
-                    env.MAJOR_VERSION = sh([script: 'git tag | sort --version-sort | tail -1 | cut -d . -f 1', returnStdout: true]).trim()
-                    env.MINOR_VERSION = sh([script: 'git tag | sort --version-sort | tail -1 | cut -d . -f 2', returnStdout: true]).trim()
-                    env.PATCH_VERSION = sh([script: 'git tag | sort --version-sort | tail -1 | cut -d . -f 3', returnStdout: true]).trim()
-                    env.IMAGE_TAG = "${env.MAJOR_VERSION}.\$((${env.MINOR_VERSION} + 1)).${env.PATCH_VERSION}"
+                    def MAJOR_VERSION = sh([script: 'git tag | sort --version-sort | tail -1 | cut -d . -f 1', returnStdout: true]).trim()
+                    def MINOR_VERSION = sh([script: 'git tag | sort --version-sort | tail -1 | cut -d . -f 2', returnStdout: true]).trim()
+                    def PATCH_VERSION = sh([script: 'git tag | sort --version-sort | tail -1 | cut -d . -f 3', returnStdout: true]).trim()
+                    def IMAGE_TAG = "${MAJOR_VERSION}.${(MINOR_VERSION.toInteger() + 1)}.${PATCH_VERSION}"
 
-                    // GIT_TAG = sh([script: 'git fetch --tag && git tag', returnStdout: true]).trim()
-                    // MAJOR_VERSION = sh([script: 'git tag | cut -d . -f 1', returnStdout: true]).trim()
-                    // MINOR_VERSION = sh([script: 'git tag | cut -d . -f 2', returnStdout: true]).trim()
-                    // PATCH_VERSION = sh([script: 'git tag | cut -d . -f 3', returnStdout: true]).trim()
-                    // IMAGE_VERSION = "${MAJOR_VERSION}.$((MINOR_VERSION.toInteger() + 1)).${PATCH_VERSION}"
-
-                    sh "docker build -t ${DOCKER_CREDENTIALS_USR}/hello-img:${IMAGE_VERSION} ."
+                    // Build and push image
+                    sh "docker build -t ${DOCKER_CREDENTIALS_USR}/hello-img:${IMAGE_TAG} ."
                     sh "echo \$DOCKER_CREDENTIALS_PSW | docker login docker.io -u \$DOCKER_CREDENTIALS_USR --password-stdin"
-                    sh "docker push ${DOCKER_CREDENTIALS_USR}/hello-img:${IMAGE_VERSION}"
+                    sh "docker push ${DOCKER_CREDENTIALS_USR}/hello-img:${IMAGE_TAG}"
 
-                    // sh "docker build -t biancadogareci/hello-img:${MAJOR_VERSION}.\$((${MINOR_VERSION} + 1)).${PATCH_VERSION} ."
-                    // sh "docker login docker.io -u biancadogareci -p Bianca_2003"
-                    // sh "docker push biancadogareci/hello-img:${MAJOR_VERSION}.\$((${MINOR_VERSION} + 1)).${PATCH_VERSION}"
+                    // Tag in Git
+                    sh "git tag ${IMAGE_TAG}"
+                    sh "git push https://${GITHUB_TOKEN}@github.com/${DOCKER_CREDENTIALS_USR}/service.git ${IMAGE_TAG}"
 
-                    sh "git tag ${env.IMAGE_TAG}"
-                    sh "git push https://${GITHUB_TOKEN}@github.com/${DOCKER_PASSWORD_USR}/service.git ${env.IMAGE_TAG}"
+                    // Export IMAGE_TAG to env so next stage can use it
+                    env.IMAGE_TAG = IMAGE_TAG
                 }
             }
         }
