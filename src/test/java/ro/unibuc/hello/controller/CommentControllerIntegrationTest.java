@@ -39,7 +39,7 @@ public class CommentControllerIntegrationTest {
     @DynamicPropertySource
     static void setProperties(DynamicPropertyRegistry registry) {
         registry.add("mongodb.connection.url", () ->
-                "mongodb://localhost:" + mongoDBContainer.getMappedPort(27017));
+                "mongodb://host.docker.internal:" + mongoDBContainer.getMappedPort(27017));
     }
 
     @Autowired
