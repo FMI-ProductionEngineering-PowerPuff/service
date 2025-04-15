@@ -32,9 +32,7 @@ pipeline {
 
                     // Tag in Git
                     sh "git tag ${IMAGE_TAG}"
-                    withCredentials([string(credentialsId: 'github_token', variable: 'GITHUB_TOKEN')]) {
-                        sh "git push https://\$GITHUB_TOKEN@github.com/BiancaDogareci/service.git refs/tags/${IMAGE_TAG}"
-                    }
+                    sh "git push https://${GITHUB_TOKEN}@github.com/BiancaDogareci/service.git ${IMAGE_TAG}"
 
                     // Export IMAGE_TAG to env so next stage can use it
                     env.IMAGE_TAG = IMAGE_TAG
