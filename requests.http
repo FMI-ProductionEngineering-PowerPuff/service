@@ -3,7 +3,7 @@
 # Prerequisite: humao.rest-client Vscode plugin (already present on codespace)
 # High-level overview of REST API concepts used here: https://www.packtpub.com/en-us/learning/how-to-tutorials/what-are-rest-verbs-and-status-codes-tutorial?srsltid=AfmBOoppDqtkhRxj5BLZONRZFzRDmh6eP-xyTo6H4OuEHYuVbrg1d4Dm
 
-@loggedInUserId = 680fbe71dc385b675b93a3be
+@loggedInUserId = 680ff9c1796b7b40f6badbb3
 @recipeId = 67d83c9f944b994e397a3959
 @userIdToFollow = 67d7339be9a5b42f61e2d082
 @commentId = 67d83fa5944b994e397a3965

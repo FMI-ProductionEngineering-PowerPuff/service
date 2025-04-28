@@ -1,5 +1,6 @@
 package ro.unibuc.hello.controller;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ro.unibuc.hello.data.CommentEntity;
@@ -12,15 +13,18 @@ import java.util.List;
 public class CommentController {
 
     private final CommentService commentService;
+    private final MeterRegistry meterRegistry;
 
-    public CommentController(CommentService commentService) {
+    public CommentController(CommentService commentService, MeterRegistry meterRegistry) {
         this.commentService = commentService;
+        this.meterRegistry = meterRegistry;
     }
 
     @PostMapping("/add")
     public ResponseEntity<?> addComment(@RequestParam String userId, @RequestParam String recipeId, @RequestBody String content) {
         try {
             CommentEntity newComment = commentService.addComment(userId, recipeId, content);
+            meterRegistry.counter("comments.added.count").increment();
             return ResponseEntity.ok(newComment);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());

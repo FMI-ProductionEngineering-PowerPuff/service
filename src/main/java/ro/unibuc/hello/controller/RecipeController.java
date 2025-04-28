@@ -71,6 +71,7 @@ public class RecipeController {
     public ResponseEntity<?> getRecipesByCategory(@RequestParam String category) {
         try {
             List<RecipeEntity> recipes = recipeService.getRecipesByCategorySortedByPopularity(category);
+            meterRegistry.counter("recipes.byCategory.requested.count").increment();
             return ResponseEntity.ok(recipes);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -97,6 +98,7 @@ public class RecipeController {
     public ResponseEntity<String> deleteRecipe(@PathVariable String recipeId, @RequestParam String userId) {
         try {
             recipeService.deleteRecipe(recipeId, userId);
+            meterRegistry.counter("recipes.deleted.count").increment();
             return ResponseEntity.ok("Recipe deleted successfully.");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());

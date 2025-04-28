@@ -1,5 +1,6 @@
 package ro.unibuc.hello.controller;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -25,6 +26,9 @@ class CommentControllerTest {
     @Mock
     private CommentService commentService;
 
+    @Mock
+    private MeterRegistry meterRegistry;
+
     @InjectMocks
     private CommentController commentController;
 
@@ -34,6 +38,8 @@ class CommentControllerTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
         mockMvc = MockMvcBuilders.standaloneSetup(commentController).build();
+
+        when(meterRegistry.counter(anyString())).thenReturn(mock(io.micrometer.core.instrument.Counter.class));
     }
 
     @Test
