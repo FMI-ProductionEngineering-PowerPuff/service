@@ -1,5 +1,6 @@
 package ro.unibuc.hello.controller;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ro.unibuc.hello.data.RecipeEntity;
@@ -16,10 +17,12 @@ public class RecipeController {
 
     private final RecipeService recipeService;
     private final FavoriteService favoriteService;
+    private final MeterRegistry meterRegistry;
 
-    public RecipeController(RecipeService recipeService, FavoriteService favoriteService) {
+    public RecipeController(RecipeService recipeService, FavoriteService favoriteService, MeterRegistry meterRegistry) {
         this.recipeService = recipeService;
         this.favoriteService = favoriteService;
+        this.meterRegistry = meterRegistry;
     }
 
     @PostMapping("/add")
@@ -137,6 +140,7 @@ public class RecipeController {
     public ResponseEntity<String> addFavorite(@PathVariable String recipeId, @RequestParam String userId) {
         try {
             favoriteService.addFavorite(userId, recipeId);
+            meterRegistry.counter("favorites.added.count").increment();
             return ResponseEntity.ok("Recipe added to favorites successfully!");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());

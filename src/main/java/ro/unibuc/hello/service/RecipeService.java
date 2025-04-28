@@ -2,6 +2,7 @@ package ro.unibuc.hello.service;
 
 import org.springframework.stereotype.Service;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import ro.unibuc.hello.data.ContributorRepository;
 import ro.unibuc.hello.data.ContributorEntity;
 import ro.unibuc.hello.data.FollowEntity;
@@ -24,40 +25,40 @@ public class RecipeService {
     private final UserRepository userRepository;
     private final FollowRepository followRepository;
     private final ContributorRepository contributorRepository;
+    private final MeterRegistry meterRegistry;
 
-    public RecipeService(RecipeRepository recipeRepository, UserRepository userRepository, FollowRepository followRepository, ContributorRepository contributorRepository) {
+    public RecipeService(RecipeRepository recipeRepository, UserRepository userRepository, FollowRepository followRepository, ContributorRepository contributorRepository, MeterRegistry meterRegistry) {
         this.recipeRepository = recipeRepository;
         this.userRepository = userRepository;
         this.followRepository = followRepository;
         this.contributorRepository = contributorRepository;
+        this.meterRegistry = meterRegistry;
     }
 
     public Optional<RecipeEntity> addRecipe(RecipeEntity recipe) {
-        // User-ul trebuie sa existe
         Optional<UserEntity> userOpt = userRepository.findById(recipe.getUserId());
         if (userOpt.isEmpty()) {
             throw new IllegalArgumentException("User not found.");
         }
-        
-        UserEntity user = userOpt.get();
 
-        // User-ul trebuie sa fie bucatar pt a putea posta o reteta
+        UserEntity user = userOpt.get();
         if (user.getRole() != UserRole.CHEF) {
             throw new IllegalArgumentException("Only chefs can add recipes.");
         }
 
-        // Orice reteta abia postata nu e frozen
         recipe.setFrozen(false);
-
-        // Orice reteta abia postata are favoriteCount 0
         recipe.setFavoriteCount(0);
 
-        // type poate sa fie Food, Alcoholic-Drink sau Non-Alcoholic-Drink
-        if (!recipe.getType().equalsIgnoreCase("Alcoholic-Drink") && !recipe.getType().equalsIgnoreCase("Non-Alcoholic-Drink") && !recipe.getType().equalsIgnoreCase("Food")) {
-            throw new IllegalArgumentException("Invalid type. Type must be 'Food', 'Alcoholic-Drink' or Non-Alcoholic-Drink'.");
+        if (!recipe.getType().equalsIgnoreCase("Alcoholic-Drink") &&
+            !recipe.getType().equalsIgnoreCase("Non-Alcoholic-Drink") &&
+            !recipe.getType().equalsIgnoreCase("Food")) {
+            throw new IllegalArgumentException("Invalid type. Type must be 'Food', 'Alcoholic-Drink' or 'Non-Alcoholic-Drink'.");
         }
 
-        return Optional.of(recipeRepository.save(recipe));
+        RecipeEntity savedRecipe = recipeRepository.save(recipe);
+
+        meterRegistry.counter("recipes.added.count").increment();
+        return Optional.of(savedRecipe);
     }
 
     public Optional<RecipeEntity> changeFrozenStatus(String recipeId, String userId) {
@@ -96,6 +97,8 @@ public class RecipeService {
                     .filter(RecipeEntity::getVegetarian)
                     .collect(Collectors.toList());
         }
+
+        meterRegistry.gauge("recipes.available.count", recipes, List::size);
 
         return recipes;
     }
@@ -150,14 +153,12 @@ public class RecipeService {
 
     public Optional<RecipeEntity> updateRecipe(String recipeId, String userId, RecipeEntity updatedRecipe) {
         Optional<RecipeEntity> recipeOpt = recipeRepository.findById(recipeId);
-
         if (recipeOpt.isEmpty()) {
             throw new IllegalArgumentException("Recipe not found.");
         }
 
         RecipeEntity existingRecipe = recipeOpt.get();
 
-        // verificam daca user-ul e autor sau contributor
         boolean isAuthor = existingRecipe.getUserId().equals(userId);
         boolean isContributor = contributorRepository
                                     .findByUserIdAndRecipeId(userId, recipeId)
@@ -167,7 +168,6 @@ public class RecipeService {
             throw new IllegalArgumentException("Only the author and contributors can update this recipe.");
         }
 
-        // Type poate sa fie "Food", "Alcoholic-Drink" sau "Non-Alcoholic-Drink"
         if (!updatedRecipe.getType().equalsIgnoreCase("Food") &&
             !updatedRecipe.getType().equalsIgnoreCase("Alcoholic-Drink") &&
             !updatedRecipe.getType().equalsIgnoreCase("Non-Alcoholic-Drink")) {
@@ -182,7 +182,9 @@ public class RecipeService {
         existingRecipe.setVegetarian(updatedRecipe.getVegetarian());
         existingRecipe.setFrozen(updatedRecipe.getFrozen());
 
-        return Optional.of(recipeRepository.save(existingRecipe));
+        RecipeEntity savedRecipe = recipeRepository.save(existingRecipe);
+
+        return Optional.of(savedRecipe);
     }
 
 

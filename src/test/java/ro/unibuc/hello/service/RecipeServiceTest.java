@@ -4,13 +4,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
 import ro.unibuc.hello.data.*;
+
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Counter;
+
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-
-
 
 class RecipeServiceTest {
 
@@ -26,15 +28,20 @@ class RecipeServiceTest {
     @Mock
     private ContributorRepository contributorRepository;
 
+    @Mock
+    private MeterRegistry meterRegistry;
+
     @InjectMocks
     private RecipeService recipeService;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+
+        // Mock counter to avoid NullPointerException when incrementing
+        Counter mockCounter = mock(Counter.class);
+        when(meterRegistry.counter(anyString())).thenReturn(mockCounter);
     }
-
-
 
     @Test
     void test_addRecipe_success() {
@@ -54,6 +61,9 @@ class RecipeServiceTest {
         assertTrue(result.isPresent());
         assertFalse(result.get().getFrozen());
         assertEquals(0, result.get().getFavoriteCount());
+
+        // Verify counter increment for added recipes
+        verify(meterRegistry.counter("recipes.added.count"), times(1)).increment();
     }
 
     // user-ul nu exista
@@ -95,15 +105,13 @@ class RecipeServiceTest {
 
         RecipeEntity recipe = new RecipeEntity();
         recipe.setUserId("user123");
-        recipe.setType("InvalidType"); // type poate sa fie Food, Non-Alcoholic-Drink sau Alcoholic-Drink
+        recipe.setType("InvalidType");
 
         when(userRepository.findById("user123")).thenReturn(Optional.of(chef));
 
         Exception exception = assertThrows(IllegalArgumentException.class, () -> recipeService.addRecipe(recipe));
-        assertEquals("Invalid type. Type must be 'Food', 'Alcoholic-Drink' or Non-Alcoholic-Drink'.", exception.getMessage());
+        assertEquals("Invalid type. Type must be 'Food', 'Alcoholic-Drink' or 'Non-Alcoholic-Drink'.", exception.getMessage());
     }
-
-
 
     @Test
     void test_changeFrozenStatus_success() {
@@ -115,16 +123,13 @@ class RecipeServiceTest {
         when(recipeRepository.findById("recipe123")).thenReturn(Optional.of(recipe));
         when(recipeRepository.save(any(RecipeEntity.class))).thenAnswer(i -> i.getArgument(0));
 
-        // Simulare
         Optional<RecipeEntity> result = recipeService.changeFrozenStatus("recipe123", "user123");
 
-        // Assert
         assertTrue(result.isPresent());
-        assertTrue(result.get().getFrozen()); // frozen trb sa se fi schimbat la true
+        assertTrue(result.get().getFrozen());
         verify(recipeRepository, times(1)).save(recipe);
     }
 
-    // reteta nu exista
     @Test
     void test_changeFrozenStatus_failure_recipeNotFound() {
         when(recipeRepository.findById("recipe123")).thenReturn(Optional.empty());
@@ -135,12 +140,11 @@ class RecipeServiceTest {
         assertEquals("Recipe not found.", exception.getMessage());
     }
 
-    // user-ul nu e autorul retetei
     @Test
     void test_changeFrozenStatus_failure_notAuthor() {
         RecipeEntity recipe = new RecipeEntity();
         recipe.setId("recipe123");
-        recipe.setUserId("author123"); // diferit de "user123" care e dat ca parametru functiei din service
+        recipe.setUserId("author123"); 
         recipe.setFrozen(false);
 
         when(recipeRepository.findById("recipe123")).thenReturn(Optional.of(recipe));
@@ -151,9 +155,6 @@ class RecipeServiceTest {
         assertEquals("Only the author can change the frozen status.", exception.getMessage());
     }
 
-
-
-    // get pentru un adult (18+) care nu e vegetarian
     @Test
     void test_getFilteredRecipes_success_noFiltering() {
         UserEntity user = new UserEntity();
@@ -179,7 +180,6 @@ class RecipeServiceTest {
         assertEquals(2, result.size());
     }
 
-    // get pentru un user care nu exista
     @Test
     void test_getFilteredRecipes_failure_userNotFound() {
         when(userRepository.findById("user123")).thenReturn(Optional.empty());
@@ -190,7 +190,6 @@ class RecipeServiceTest {
         assertEquals("User not found.", exception.getMessage());
     }
 
-    // get pentru un user mai tanar de 18 ani, vegetarian
     @Test
     void test_getFilteredRecipes_filtersApplied() {
         UserEntity user = new UserEntity();
@@ -199,12 +198,12 @@ class RecipeServiceTest {
         user.setVegetarian(true);
 
         RecipeEntity r1 = new RecipeEntity();
-        r1.setType("Alcoholic-Drink"); // sa nu apara pt ca e alcool
+        r1.setType("Alcoholic-Drink");
         r1.setVegetarian(true);
 
         RecipeEntity r2 = new RecipeEntity();
         r2.setType("Food");
-        r2.setVegetarian(false); // sa nu apara pt ca nu e vegetariana
+        r2.setVegetarian(false);
 
         RecipeEntity r3 = new RecipeEntity();
         r3.setType("Food");
@@ -220,8 +219,6 @@ class RecipeServiceTest {
         assertEquals(1, result.size());
         assertTrue(result.contains(r3));
     }
-
-
 
     @Test
     void test_getRecipeById_success() {
@@ -244,7 +241,6 @@ class RecipeServiceTest {
         assertEquals("recipe123", result.get().getId());
     }
 
-    // user-ul nu exista
     @Test
     void test_getRecipeById_failure_userNotFound() {
         when(userRepository.findById("user123")).thenReturn(Optional.empty());
@@ -255,7 +251,6 @@ class RecipeServiceTest {
         assertEquals("User not found.", exception.getMessage());
     }
 
-    // reteta nu exista
     @Test
     void test_getRecipeById_failure_recipeNotFound() {
         UserEntity user = new UserEntity();
@@ -270,7 +265,6 @@ class RecipeServiceTest {
         assertEquals("Recipe not found.", exception.getMessage());
     }
 
-    // user-ul are sub 18 ani si reteta e alcoolica
     @Test
     void test_getRecipeById_failure_userUnderageForAlcohol() {
         UserEntity user = new UserEntity();

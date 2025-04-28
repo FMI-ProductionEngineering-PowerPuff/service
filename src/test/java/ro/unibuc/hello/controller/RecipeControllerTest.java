@@ -1,5 +1,6 @@
 package ro.unibuc.hello.controller;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,6 +36,9 @@ class RecipeControllerTest {
     @Mock
     private FavoriteService favoriteService;
 
+    @Mock
+    private MeterRegistry meterRegistry;
+
     @InjectMocks
     private RecipeController recipeController;
 
@@ -46,6 +50,7 @@ class RecipeControllerTest {
         mockMvc = MockMvcBuilders.standaloneSetup(recipeController).build();
 
         objectMapper.registerModule(new JavaTimeModule()); // pt variabila de tipul instant, createdAt
+        when(meterRegistry.counter(anyString())).thenReturn(mock(io.micrometer.core.instrument.Counter.class));
     }
 
     @Test
