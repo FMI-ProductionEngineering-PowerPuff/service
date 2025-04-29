@@ -23,6 +23,10 @@ public class FavoriteService {
         this.recipeRepository = recipeRepository;
     }
 
+    public int countFavoritesForRecipe(String recipeId) {
+        return favoriteRepository.countByRecipeId(recipeId);
+    }    
+
     public void addFavorite(String userId, String recipeId) {
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));

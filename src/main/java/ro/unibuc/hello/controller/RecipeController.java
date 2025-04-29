@@ -3,6 +3,7 @@ package ro.unibuc.hello.controller;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import io.micrometer.core.instrument.Tag;
 import ro.unibuc.hello.data.RecipeEntity;
 import ro.unibuc.hello.service.FavoriteService;
 import ro.unibuc.hello.service.RecipeService;
@@ -143,6 +144,13 @@ public class RecipeController {
         try {
             favoriteService.addFavorite(userId, recipeId);
             meterRegistry.counter("favorites.added.count").increment();
+    
+            meterRegistry.gauge("favorites.per.recipe.count",
+                    List.of(Tag.of("recipeId", recipeId)),
+                    favoriteService,
+                    svc -> svc.countFavoritesForRecipe(recipeId)
+            );
+    
             return ResponseEntity.ok("Recipe added to favorites successfully!");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -153,10 +161,18 @@ public class RecipeController {
     public ResponseEntity<String> removeFavorite(@PathVariable String recipeId, @RequestParam String userId) {
         try {
             favoriteService.removeFavorite(userId, recipeId);
+    
+            meterRegistry.gauge("favorites.per.recipe.count",
+                    List.of(Tag.of("recipeId", recipeId)),
+                    favoriteService,
+                    svc -> svc.countFavoritesForRecipe(recipeId)
+            );
+    
             return ResponseEntity.ok("Recipe removed from favorites successfully!");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+    
     
 }
