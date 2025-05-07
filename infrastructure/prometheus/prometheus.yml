@@ -1,6 +1,6 @@
 global:
-  scrape_interval: 30s
-  scrape_timeout: 30s
+  scrape_interval: 10s
+  scrape_timeout: 10s
 
 scrape_configs:
   - job_name: 'prometheus'
@@ -28,6 +28,7 @@ rule_files:
   - app-alerts.yml
   - canary-alerts.yml
   - container-alerts.yml
+  - alert-rules.yml
 
 alerting:
   alertmanagers:

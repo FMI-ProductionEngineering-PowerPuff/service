@@ -3,6 +3,7 @@ package ro.unibuc.hello.service;
 import org.springframework.stereotype.Service;
 
 import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Counter;
 import ro.unibuc.hello.data.ContributorRepository;
 import ro.unibuc.hello.data.ContributorEntity;
 import ro.unibuc.hello.data.FollowEntity;
@@ -27,22 +28,28 @@ public class RecipeService {
     private final ContributorRepository contributorRepository;
     private final MeterRegistry meterRegistry;
 
+    private final Counter recipeAddFailedCounter;
+
     public RecipeService(RecipeRepository recipeRepository, UserRepository userRepository, FollowRepository followRepository, ContributorRepository contributorRepository, MeterRegistry meterRegistry) {
         this.recipeRepository = recipeRepository;
         this.userRepository = userRepository;
         this.followRepository = followRepository;
         this.contributorRepository = contributorRepository;
         this.meterRegistry = meterRegistry;
+
+        this.recipeAddFailedCounter = meterRegistry.counter("recipe_add_failed_total");
     }
 
     public Optional<RecipeEntity> addRecipe(RecipeEntity recipe) {
         Optional<UserEntity> userOpt = userRepository.findById(recipe.getUserId());
         if (userOpt.isEmpty()) {
+            recipeAddFailedCounter.increment();
             throw new IllegalArgumentException("User not found.");
         }
 
         UserEntity user = userOpt.get();
         if (user.getRole() != UserRole.CHEF) {
+            recipeAddFailedCounter.increment();
             throw new IllegalArgumentException("Only chefs can add recipes.");
         }
 
@@ -52,6 +59,7 @@ public class RecipeService {
         if (!recipe.getType().equalsIgnoreCase("Alcoholic-Drink") &&
             !recipe.getType().equalsIgnoreCase("Non-Alcoholic-Drink") &&
             !recipe.getType().equalsIgnoreCase("Food")) {
+            recipeAddFailedCounter.increment();
             throw new IllegalArgumentException("Invalid type. Type must be 'Food', 'Alcoholic-Drink' or 'Non-Alcoholic-Drink'.");
         }
 

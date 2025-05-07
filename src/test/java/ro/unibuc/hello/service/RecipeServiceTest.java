@@ -37,10 +37,20 @@ class RecipeServiceTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-
-        // Mock counter to avoid NullPointerException when incrementing
+    
         Counter mockCounter = mock(Counter.class);
-        when(meterRegistry.counter(anyString())).thenReturn(mockCounter);
+    
+        // Always return the same mock for both metrics
+        when(meterRegistry.counter(eq("recipes.added.count"))).thenReturn(mock(Counter.class));
+        when(meterRegistry.counter(eq("recipe_add_failed_total"))).thenReturn(mockCounter);
+    
+        recipeService = new RecipeService(
+            recipeRepository,
+            userRepository,
+            followRepository,
+            contributorRepository,
+            meterRegistry
+        );
     }
 
     @Test

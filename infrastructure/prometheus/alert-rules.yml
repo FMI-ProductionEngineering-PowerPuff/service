@@ -1,0 +1,19 @@
+groups:
+  - name: Lab9Alerts
+    rules:
+      - alert: RecipeAddFailuresHigh
+        expr: increase(recipe_add_failed_total[10s]) > 3
+        for: 5s
+        labels:
+          severity: warning
+        annotations:
+          summary: "High number of failed recipe submissions"
+          description: "More than 3 recipe add failures detected in the last minute"
+      - alert: RecipeAddedTriggered
+        expr: recipes_added_count_total >= 1
+        for: 10s
+        labels:
+          severity: info
+        annotations:
+          summary: "A recipe was added"
+          description: "The metric recipes_added_count_total has reached 1 or more"
